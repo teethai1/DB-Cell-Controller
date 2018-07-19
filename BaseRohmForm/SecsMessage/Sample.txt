@@ -1,0 +1,35 @@
+﻿
+
+
+Private Sub S12F4()
+
+    Dim TEST As New S12F4
+    Dim REFP As Point
+    Dim REFPList As New List(Of Point)
+    REFP = New Point(1, 1)
+    REFPList.Add(REFP)
+    REFP = New Point(2, 2)
+    REFPList.Add(REFP)
+
+    TEST.SetS12F4("MID", 0, 1, 2, 3, REFPList, "DUTMS", 4, 5, 6, 7, 8, "G", ".", 9)
+    RaiseEvent E_HostSend(TEST)
+End Sub
+
+
+  Private Sub btnS2F43_Click(sender As System.Object, e As System.EventArgs) Handles btnS2F43.Click
+
+        'Sample ....................................
+        'Dim SF As New S2F43
+        'Dim Func As Byte() = {11, 12, 13}
+        'SF.AddStream(6, Func)
+        'Func = {1, 2, 3}
+        'SF.AddStream(1, Func)
+        '...........................................
+
+        Dim SF As New S2F43
+        Dim Func As Byte() = {11}
+        SF.AddStream(6, Func)
+
+
+        RaiseEvent E_HostSend(SF)
+    End Sub

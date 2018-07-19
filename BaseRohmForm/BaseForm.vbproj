@@ -1,0 +1,637 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E4C17CCE-81FB-47EA-A75C-74158EC8D5E8}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>CellController.My.MyApplication</StartupObject>
+    <RootNamespace>CellController</RootNamespace>
+    <AssemblyName>CellconB</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>CellconB.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>CellconB.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>On</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AuthenticationUser">
+      <HintPath>dllSource\AuthenticationUser.dll</HintPath>
+    </Reference>
+    <Reference Include="MapConverterForCanon, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\MapConverterForCanon.dll</HintPath>
+    </Reference>
+    <Reference Include="Rohm.Apcs.Tdc, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Rohm.Apcs.Tdc.dll</HintPath>
+    </Reference>
+    <Reference Include="Rohm.Ems, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Rohm.Ems.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Timer">
+      <HintPath>.\Timer.dll</HintPath>
+    </Reference>
+    <Reference Include="WMapTools">
+      <HintPath>dllSource\WMapTools.dll</HintPath>
+    </Reference>
+    <Reference Include="XtraLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dllSource\XtraLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApcsWebServiceSoapClient.vb" />
+    <Compile Include="Authentication .vb" />
+    <Compile Include="clsErrorLog.vb" />
+    <Compile Include="DBxDataSet.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DBxDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DBxDataSet.vb">
+      <DependentUpon>DBxDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="EquipmentObj\CellConObj.vb" />
+    <Compile Include="EquipmentObj\Equipment.vb" />
+    <Compile Include="EquipmentObj\SecsGemID.vb" />
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormConsole.Designer.vb">
+      <DependentUpon>FormConsole.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FormConsole.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBMWarning.Designer.vb">
+      <DependentUpon>frmBMWarning.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmBMWarning.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmdisplayinput.Designer.vb">
+      <DependentUpon>frmdisplayinput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmdisplayinput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFinalInspection.Designer.vb">
+      <DependentUpon>frmFinalInspection.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmFinalInspection.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFirstInspection.Designer.vb">
+      <DependentUpon>frmFirstInspection.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmFirstInspection.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFrameInputManual.Designer.vb">
+      <DependentUpon>frmFrameInputManual.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmFrameInputManual.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmInputJig.Designer.vb">
+      <DependentUpon>frmInputJig.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmInputJig.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmInputMaterial.designer.vb">
+      <DependentUpon>frmInputMaterial.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmInputMaterial.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmKeyboard.Designer.vb">
+      <DependentUpon>frmKeyboard.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmKeyboard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOPConfirm.Designer.vb">
+      <DependentUpon>frmOPConfirm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmOPConfirm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmRecirpeChange.Designer.vb">
+      <DependentUpon>frmRecirpeChange.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmRecirpeChange.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSelectWaferLotNo.Designer.vb">
+      <DependentUpon>frmSelectWaferLotNo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSelectWaferLotNo.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTorinokoshi.Designer.vb">
+      <DependentUpon>frmTorinokoshi.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmTorinokoshi.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmWarning.Designer.vb">
+      <DependentUpon>frmWarning.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmWarning.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="INPUTQty.Designer.vb">
+      <DependentUpon>INPUTQty.vb</DependentUpon>
+    </Compile>
+    <Compile Include="INPUTQty.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="KeyBoard.Designer.vb">
+      <DependentUpon>KeyBoard.vb</DependentUpon>
+    </Compile>
+    <Compile Include="KeyBoard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginUser.Designer.vb">
+      <DependentUpon>LoginUser.vb</DependentUpon>
+    </Compile>
+    <Compile Include="LoginUser.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LotInfomationEnd.vb" />
+    <Compile Include="LotInformationCheck.vb" />
+    <Compile Include="MapUploadParameter.vb" />
+    <Compile Include="Material.vb" />
+    <Compile Include="MaterialClass.vb" />
+    <Compile Include="nSECs%28TempForSMLEdit%29\SECSMSG.vb" />
+    <Compile Include="QrInput.Designer.vb">
+      <DependentUpon>QrInput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="QrInput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Recipe\PDE.vb" />
+    <Compile Include="SecsGeemFrmEdit.Designer.vb">
+      <DependentUpon>SecsGeemFrmEdit.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SecsGeemFrmEdit.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module\SecsGemModule.vb" />
+    <Compile Include="SecsGemFrm.Designer.vb">
+      <DependentUpon>SecsGemFrm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SecsGemFrm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SecsGemFrmView.Designer.vb">
+      <DependentUpon>SecsGemFrmView.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SecsGemFrmView.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SecsMessage\S12Deny.vb" />
+    <Compile Include="SecsMessage\S10F1.vb" />
+    <Compile Include="SecsMessage\S10F2.vb" />
+    <Compile Include="SecsMessage\S12F10CanonUpload.vb" />
+    <Compile Include="SecsMessage\S12F15CanonDownload.vb" />
+    <Compile Include="SecsMessage\S12F16CanonDownload.vb" />
+    <Compile Include="SecsMessage\S12F1CanonUpload.vb" />
+    <Compile Include="SecsMessage\S12F1Esec.vb" />
+    <Compile Include="SecsMessage\S12F10.vb" />
+    <Compile Include="SecsMessage\S12F15.vb" />
+    <Compile Include="SecsMessage\S12F16.vb" />
+    <Compile Include="SecsMessage\S12F19.vb" />
+    <Compile Include="SecsMessage\S12F2.vb" />
+    <Compile Include="SecsMessage\S12F20.vb" />
+    <Compile Include="SecsMessage\S12F2CanonUpload.vb" />
+    <Compile Include="SecsMessage\S12F3.vb" />
+    <Compile Include="SecsMessage\S12F3CanonDownload.vb" />
+    <Compile Include="SecsMessage\S12F4.vb" />
+    <Compile Include="SecsMessage\S12F4CanonDownload.vb" />
+    <Compile Include="SecsMessage\S12F4E.vb" />
+    <Compile Include="SecsMessage\S12F5CanonUpload.vb" />
+    <Compile Include="SecsMessage\S12F5Esec.vb" />
+    <Compile Include="SecsMessage\S12F6.vb" />
+    <Compile Include="SecsMessage\S12F6CanonUpload.vb" />
+    <Compile Include="SecsMessage\S12F9.vb" />
+    <Compile Include="SecsMessage\S12F9CanonUpload.vb" />
+    <Compile Include="SecsMessage\S1F1.vb" />
+    <Compile Include="SecsMessage\S1F14E.vb" />
+    <Compile Include="SecsMessage\Enums.vb" />
+    <Compile Include="SecsMessage\S1F13.vb" />
+    <Compile Include="SecsMessage\S1F14.vb" />
+    <Compile Include="SecsMessage\S1F18.vb" />
+    <Compile Include="SecsMessage\S1F3.vb" />
+    <Compile Include="SecsMessage\S1F4.vb" />
+    <Compile Include="SecsMessage\S2F13.vb" />
+    <Compile Include="SecsMessage\S2F14.vb" />
+    <Compile Include="SecsMessage\S2F15.vb" />
+    <Compile Include="SecsMessage\S2F16.vb" />
+    <Compile Include="SecsMessage\S2F17.vb" />
+    <Compile Include="SecsMessage\S2F18.vb" />
+    <Compile Include="SecsMessage\S6F23.vb" />
+    <Compile Include="SecsMessage\S2F33.vb" />
+    <Compile Include="SecsMessage\S2F34.vb" />
+    <Compile Include="SecsMessage\S2F35.vb" />
+    <Compile Include="SecsMessage\S2F36.vb" />
+    <Compile Include="SecsMessage\S2F37.vb" />
+    <Compile Include="SecsMessage\S2F38.vb" />
+    <Compile Include="SecsMessage\S2F41.vb" />
+    <Compile Include="SecsMessage\S2F42.vb" />
+    <Compile Include="SecsMessage\S10F3.vb" />
+    <Compile Include="SecsMessage\S2F43.vb" />
+    <Compile Include="SecsMessage\S5F1.vb" />
+    <Compile Include="SecsMessage\S5F2.vb" />
+    <Compile Include="SecsMessage\S5F3.vb" />
+    <Compile Include="SecsMessage\S5F4.vb" />
+    <Compile Include="SecsMessage\S5F5.vb" />
+    <Compile Include="SecsMessage\S5F6.vb" />
+    <Compile Include="SecsMessage\S64F1.vb" />
+    <Compile Include="SecsMessage\S64F10.vb" />
+    <Compile Include="SecsMessage\S64F11.vb" />
+    <Compile Include="SecsMessage\S64F12.vb" />
+    <Compile Include="SecsMessage\S64F2.vb" />
+    <Compile Include="SecsMessage\S64F3.vb" />
+    <Compile Include="SecsMessage\S64F4.vb" />
+    <Compile Include="SecsMessage\S64F9.vb" />
+    <Compile Include="SecsMessage\S6F11.vb" />
+    <Compile Include="SecsMessage\S6F12.vb" />
+    <Compile Include="SecsMessage\S6F24.vb" />
+    <Compile Include="SecsMessage\S6F3.vb" />
+    <Compile Include="SecsMessage\S6F4.vb" />
+    <Compile Include="SecsMessage\S7F1.vb" />
+    <Compile Include="SecsMessage\S7F17.vb" />
+    <Compile Include="SecsMessage\S7F18.vb" />
+    <Compile Include="SecsMessage\S7F2.vb" />
+    <Compile Include="SecsMessage\S7F20.vb" />
+    <Compile Include="SecsMessage\S7F3.vb" />
+    <Compile Include="SecsMessage\S7F4.vb" />
+    <Compile Include="SecsMessage\S7F5.vb" />
+    <Compile Include="SecsMessage\S7F6.vb" />
+    <Compile Include="SecsMessage\SecsDataType.vb" />
+    <Compile Include="SecsMessage\SECSGEMDB.vb" />
+    <Compile Include="Service References\JIGWebService\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\ServiceReference1\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Setting.Designer.vb">
+      <DependentUpon>Setting.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Setting.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm1.Designer.vb">
+      <DependentUpon>LoginForm1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="LoginForm1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MDIParent1.Designer.vb">
+      <DependentUpon>MDIParent1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MDIParent1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module\ModuleAppGeneral.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="CommonData.vb" />
+    <Compile Include="ProcessForm.Designer.vb">
+      <DependentUpon>ProcessForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProductionTable.Designer.vb">
+      <DependentUpon>ProductionTable.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ProductionTable.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TcpIpClient.vb" />
+    <Compile Include="TcpIpClientTest.Designer.vb">
+      <DependentUpon>TcpIpClientTest.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TcpIpClientTest.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkingSlipQRCode.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormConsole.resx">
+      <DependentUpon>FormConsole.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBMWarning.resx">
+      <DependentUpon>frmBMWarning.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmdisplayinput.resx">
+      <DependentUpon>frmdisplayinput.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFinalInspection.resx">
+      <DependentUpon>frmFinalInspection.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFirstInspection.resx">
+      <DependentUpon>frmFirstInspection.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFrameInputManual.resx">
+      <DependentUpon>frmFrameInputManual.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmInputJig.resx">
+      <DependentUpon>frmInputJig.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmInputMaterial.resx">
+      <DependentUpon>frmInputMaterial.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmKeyboard.resx">
+      <DependentUpon>frmKeyboard.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmOPConfirm.resx">
+      <DependentUpon>frmOPConfirm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmRecirpeChange.resx">
+      <DependentUpon>frmRecirpeChange.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSelectWaferLotNo.resx">
+      <DependentUpon>frmSelectWaferLotNo.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTorinokoshi.resx">
+      <DependentUpon>frmTorinokoshi.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmWarning.resx">
+      <DependentUpon>frmWarning.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="INPUTQty.resx">
+      <DependentUpon>INPUTQty.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="KeyBoard.resx">
+      <DependentUpon>KeyBoard.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginUser.resx">
+      <DependentUpon>LoginUser.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QrInput.resx">
+      <DependentUpon>QrInput.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SecsGeemFrmEdit.resx">
+      <DependentUpon>SecsGeemFrmEdit.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginForm1.resx">
+      <DependentUpon>LoginForm1.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDIParent1.resx">
+      <DependentUpon>MDIParent1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProcessForm.resx">
+      <DependentUpon>ProcessForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProductionTable.resx">
+      <DependentUpon>ProductionTable.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SecsGemFrm.resx">
+      <DependentUpon>SecsGemFrm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SecsGemFrmView.resx">
+      <DependentUpon>SecsGemFrmView.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Setting.resx">
+      <DependentUpon>Setting.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TcpIpClientTest.resx">
+      <DependentUpon>TcpIpClientTest.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="DBxDataSet.xsc">
+      <DependentUpon>DBxDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="DBxDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DBxDataSet.Designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DBxDataSet.xss">
+      <DependentUpon>DBxDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="Service References\JIGWebService\CellController.JIGWebService.CheckResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JIGWebService\CellController.JIGWebService.CheckResultJIGInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JIGWebService\JIGService.wsdl" />
+    <None Include="Service References\ServiceReference1\apcswebservice.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\UserBlank.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\machine2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\datatable.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AUTOMATIVEBlue.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\reliableResize1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="obj\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\inputdata5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\HR.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\JIGWebService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Service References\JIGWebService\configuration.svcinfo" />
+    <None Include="Service References\JIGWebService\configuration91.svcinfo" />
+    <None Include="Service References\JIGWebService\JIGService.disco" />
+    <None Include="Service References\ServiceReference1\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Service References\ServiceReference1\configuration.svcinfo" />
+    <None Include="Service References\ServiceReference1\configuration91.svcinfo" />
+    <None Include="Service References\ServiceReference1\apcswebservice.disco" />
+    <None Include="Resources\Lock-256.png" />
+    <None Include="Resources\Unlock-256.png" />
+    <None Include="Resources\First.JPG" />
+    <None Include="Resources\PreformID.JPG" />
+    <None Include="Resources\FrameID.JPG" />
+    <None Include="Resources\Material Frame.bmp" />
+    <None Include="Resources\T.JPG" />
+    <None Include="Resources\F.JPG" />
+    <None Include="Resources\minimize-window-xxl.png" />
+    <Content Include="SecsMessage\Sample.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\JIGWebService\" />
+    <WCFMetadataStorage Include="Service References\ServiceReference1\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

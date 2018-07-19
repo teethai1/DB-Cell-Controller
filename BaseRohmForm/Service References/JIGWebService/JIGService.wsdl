@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="SetupCollet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="LotNo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="qrCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="machineNo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="machineType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userNo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetupColletResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SetupColletResult" type="tns:CheckResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CheckResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IsPass" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorMessage" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ItemCode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SetupColletWithInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="LotNo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="qrCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="machineNo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="machineType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userNo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetupColletWithInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SetupColletWithInfoResult" type="tns:CheckResultJIGInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CheckResultJIGInfo">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:CheckResult">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="JIGInfo" type="tns:JIGInfo" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="JIGInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="SubType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LifeTime" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="STDLifeTime" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="PeriodCheckTime" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="STDPeriodCheckTime" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Code" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Test">
+        <s:complexType />
+      </s:element>
+      <s:element name="TestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="TestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="SetupColletSoapIn">
+    <wsdl:part name="parameters" element="tns:SetupCollet" />
+  </wsdl:message>
+  <wsdl:message name="SetupColletSoapOut">
+    <wsdl:part name="parameters" element="tns:SetupColletResponse" />
+  </wsdl:message>
+  <wsdl:message name="SetupColletWithInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:SetupColletWithInfo" />
+  </wsdl:message>
+  <wsdl:message name="SetupColletWithInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:SetupColletWithInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="TestSoapIn">
+    <wsdl:part name="parameters" element="tns:Test" />
+  </wsdl:message>
+  <wsdl:message name="TestSoapOut">
+    <wsdl:part name="parameters" element="tns:TestResponse" />
+  </wsdl:message>
+  <wsdl:portType name="JIGServiceSoap">
+    <wsdl:operation name="SetupCollet">
+      <wsdl:input message="tns:SetupColletSoapIn" />
+      <wsdl:output message="tns:SetupColletSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetupColletWithInfo">
+      <wsdl:input message="tns:SetupColletWithInfoSoapIn" />
+      <wsdl:output message="tns:SetupColletWithInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Test">
+      <wsdl:input message="tns:TestSoapIn" />
+      <wsdl:output message="tns:TestSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="JIGServiceSoap" type="tns:JIGServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SetupCollet">
+      <soap:operation soapAction="http://tempuri.org/SetupCollet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetupColletWithInfo">
+      <soap:operation soapAction="http://tempuri.org/SetupColletWithInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Test">
+      <soap:operation soapAction="http://tempuri.org/Test" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="JIGServiceSoap12" type="tns:JIGServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SetupCollet">
+      <soap12:operation soapAction="http://tempuri.org/SetupCollet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetupColletWithInfo">
+      <soap12:operation soapAction="http://tempuri.org/SetupColletWithInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Test">
+      <soap12:operation soapAction="http://tempuri.org/Test" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="JIGService">
+    <wsdl:port name="JIGServiceSoap" binding="tns:JIGServiceSoap">
+      <soap:address location="http://172.16.101.27/JIGAndToolingPartControlSystem/JIGService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="JIGServiceSoap12" binding="tns:JIGServiceSoap12">
+      <soap12:address location="http://172.16.101.27/JIGAndToolingPartControlSystem/JIGService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
