@@ -256,6 +256,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Recipe\PDE.vb" />
+    <Compile Include="Resize.vb" />
     <Compile Include="SecsGeemFrmEdit.Designer.vb">
       <DependentUpon>SecsGeemFrmEdit.vb</DependentUpon>
     </Compile>

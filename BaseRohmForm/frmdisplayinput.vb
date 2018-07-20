@@ -17,7 +17,7 @@ Public Class frmdisplayinput
             probar = 100
         End If
         ProgressBar1.Value = probar
-        Dim frmWarning As New frmWarning
+
         If e.KeyChar = Convert.ToChar(13) Then
             If tbQR.Text.Length = 252 Or tbQR.Text.Length = My.Settings.WorkingSlipQRLenght Then              '160629 \783 Support New QR
                 Dim WorkSlipQR As New WorkingSlipQRCode
@@ -55,8 +55,7 @@ Public Class frmdisplayinput
                     lbcaption.Text = "กรุณาสแกน Operator Number"
                     Panel1.Visible = False
                 Else
-                    frmWarning.WarningTimeout(m_frmMain.m_QRReadAlarm)
-                    frmWarning.ShowDialog()
+                    m_frmWarningDialog(m_frmMain.m_QRReadAlarm, True)
 
                     ProgressBar1.Value = 0
                     tbQR.Text = ""
@@ -65,9 +64,7 @@ Public Class frmdisplayinput
             Else
                 ProgressBar1.Value = 0
                 tbQR.Text = ""
-                frmWarning.WarningTimeout("QRCode ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง")
-                frmWarning.ShowDialog()                 'Clear for New value input
-                tbQR.Focus()
+                m_frmWarningDialog("QRCode ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง", True)                'Clear for New value input
             End If
         End If
 
@@ -82,14 +79,12 @@ Public Class frmdisplayinput
   
         ProgressBar1.Value = probar
         Dim wr As New WorkingSlipQRCode
-        Dim frmAlarm As New frmWarning
         If e.KeyChar = Convert.ToChar(13) Then
 
 
             If tbOP.Text.Length = 6 Then                   'OPID Qr length is 6
                 If Not IsNumeric(Microsoft.VisualBasic.Right(tbOP.Text, 5)) Then '170116 \783 Support subcontact Sxxxxx
-                    frmAlarm.WarningTimeout("OP No:" & tbOP.Text & " ไม่ถูกต้องกรุณาตรวจสอบ")
-                    frmAlarm.ShowDialog()
+                    m_frmWarningDialog("OP No:" & tbOP.Text & " ไม่ถูกต้องกรุณาตรวจสอบ", True)
                     ProgressBar1.Value = 0
                     tbOP.Text = ""
                     tbOP.Focus()
@@ -103,8 +98,7 @@ Public Class frmdisplayinput
                     Dim Authen As New Authentication
                     Authen.PermiisionCheck(workslip.DeviceTPDirection2, tbOP.Text, My.Settings.UserAuthenOP, My.Settings.UserAuthenGL, My.Settings.ProcessName, My.Settings.ProcessName & "-" & My.Settings.EquipmentNo)
                     If Authen.Ispass = False Then
-                        frmAlarm.WarningTimeout(Authen.ErrorMessage)
-                        frmAlarm.ShowDialog()
+                        m_frmWarningDialog(Authen.ErrorMessage, True)
                         tbOP.Text = ""
                         ProgressBar1.Value = 0
                         tbOP.Focus()
@@ -274,8 +268,7 @@ Public Class frmdisplayinput
 
                 Me.DialogResult = Windows.Forms.DialogResult.OK
             Else
-                frmAlarm.WarningTimeout("OP No:" & tbOP.Text & " ไม่ถูกต้องกรุณาตรวจสอบ")
-                frmAlarm.ShowDialog()
+                m_frmWarningDialog("OP No:" & tbOP.Text & " ไม่ถูกต้องกรุณาตรวจสอบ", True)
                 ProgressBar1.Value = 0
                 tbOP.Text = ""
                 tbOP.Focus()
@@ -306,12 +299,10 @@ Public Class frmdisplayinput
         End If
         ProgressBar1.Value = probar
         Dim wr As New WorkingSlipQRCode
-        Dim frmAlarm As New frmWarning
         If e.KeyChar = Convert.ToChar(13) Then
             If tbOPCheck.Text.Length = 6 Then                   'OPID Qr length is 6
                 If Not IsNumeric(Microsoft.VisualBasic.Right(tbOPCheck.Text, 5)) Then '170116 \783 Support subcontact Sxxxxx
-                    frmAlarm.WarningTimeout("OP No " & tbOPCheck.Text & " ไม่ถูกต้องกรุณาตรวจสอบ")
-                    frmAlarm.ShowDialog()
+                    m_frmWarningDialog("OP No " & tbOPCheck.Text & " ไม่ถูกต้องกรุณาตรวจสอบ", True)
                     Exit Sub
                 End If
 
@@ -323,8 +314,7 @@ Public Class frmdisplayinput
                     Dim Authen As New Authentication
                     Authen.PermiisionCheck(workslip.DeviceTPDirection2, tbOP.Text, My.Settings.UserAuthenOP, My.Settings.UserAuthenGL, My.Settings.ProcessName, My.Settings.ProcessName & "-" & My.Settings.EquipmentNo)
                     If Authen.Ispass = False Then
-                        frmAlarm.WarningTimeout(Authen.ErrorMessage)
-                        frmAlarm.ShowDialog()
+                        m_frmWarningDialog(Authen.ErrorMessage, True)
                         tbOPCheck.Text = ""
                         ProgressBar1.Value = 0
                         tbOPCheck.Focus()
@@ -338,8 +328,7 @@ Public Class frmdisplayinput
                 Me.DialogResult = Windows.Forms.DialogResult.OK
                 tbOPCheck.Visible = False
             Else
-                frmAlarm.WarningTimeout("QRCode:" & tbOPCheck.Text & " ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง")
-                frmAlarm.ShowDialog()                 'Clear for New value input
+                m_frmWarningDialog("QRCode:" & tbOPCheck.Text & " ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง", True)
                 ProgressBar1.Value = 0
                 tbOPCheck.Text = ""
                 tbOPCheck.Focus()

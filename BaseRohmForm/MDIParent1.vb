@@ -1591,30 +1591,6 @@ show:
         FrmProcessFill()  'Show when Alarm_160623 \783
     End Sub
 
-
-
-    Private Sub OPIDClick() Handles FrmHelper.E_OPIDClick     '170224 \783 Helper form addition
-        FrmHelper.btnOPID.Text = "OPID"
-        FrmProduct.lbOPID.Text = OprData.OPID
-        slMessage.Text = "Please Read OPID QR Data" & Format(Now, " |HH:mm:ss.fff")
-    End Sub
-
-    Private Sub QR_OPIDRead() Handles FrmHelper.E_QRReadOPIDSuccess, FrmProduct.E_QRReadOPIDSuccess
-        slMessage.Text = "QR OPID Read Success_" & Format(Now, " |HH:mm:ss.fff")
-        FrmProduct.lbOPID.Text = OprData.OPID
-        If OprData.UserLevel = CommonData.Level.ADMIN Then
-            OprData.UserLevel = CommonData.Level.OP
-            MainControlfrm.btnLogin.Text = "OP"
-        End If
-        If FrmHelper Is Nothing Then
-            Exit Sub
-        End If
-        FrmHelper.btnOPID.Text = OprData.OPID
-        FrmHelper.pbxOPIDBorder.BackColor = Color.Transparent
-        FrmHelper.pbxWorkSlipBorder.BackColor = Color.Blue
-    End Sub
-
-
     Private Sub TransactionDataSave(ByVal QrData As String) Handles FrmProduct.E_TransactionDataSave
         Dim WorkSlipQR As New WorkingSlipQRCode
         Dim Ans = WorkSlipQR.TransactionDataSave(OprData.QrData)
@@ -1625,12 +1601,7 @@ show:
 
     Private Sub WorkSlipDataClear() Handles FrmHelper.E_WorkSlipClick
         slMessage.Text = "Please Read Work Slip QR Data" & Format(Now, " |HH:mm:ss.fff")
-        FrmProduct.lbLotNo.Text = ""
-        FrmProduct.lbPackage.Text = ""
-        FrmProduct.lbDevice.Text = ""
-        FrmProduct.lbRecipe.Text = ""
-        FrmProduct.lbStartTime.Text = ""
-        FrmProduct.lbEndTime.Text = ""
+
         FrmHelper.pbxWorkSlipBorder.BackColor = Color.Blue
     End Sub
 

@@ -15,13 +15,11 @@ Public Class frmInputMaterial
 
     Dim QRCodeSpliter As WorkingSlipQRCode
     Public Sub tbRevQR_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles tbRevQR.KeyPress
-        Dim frmalarm As New frmWarning
         If e.KeyChar = Chr(13) Then
             If lbCaption.Text.Contains("Preform") = True Then
                 If e.KeyChar = Convert.ToChar(13) Then
                     If PreformCheck(tbRevQR.Text) = False Then
-                        frmalarm.WarningTimeout(m_PreformAlarm)
-                        frmalarm.ShowDialog()
+                        m_frmWarningDialog(m_PreformAlarm, True)
                         tbRevQR.Text = ""
                         ProgressBar1.Value = 0
                         tbRevQR.Focus()
@@ -31,8 +29,7 @@ Public Class frmInputMaterial
                 End If
             ElseIf lbCaption.Text.Contains("Frame") = True Then
                 If tbRevQR.Text.Length <> 12 OrElse IsNumeric(tbRevQR.Text) = False Then
-                    frmalarm.WarningTimeout("QR Framไม่ถูกต้องกรุณาตรวจสอบ ค่าที่อ่านได้คือ (" & tbRevQR.Text & ")")
-                    frmalarm.ShowDialog()
+                    m_frmWarningDialog("QR Framไม่ถูกต้องกรุณาตรวจสอบ ค่าที่อ่านได้คือ (" & tbRevQR.Text & ")", True)
                     tbRevQR.Text = ""
                     tbRevQR.Focus()
                     ProgressBar1.Value = 0
@@ -46,8 +43,7 @@ Public Class frmInputMaterial
                     FrameMatAdapter.FrameMaterail_IS(FrameMat, tbRevQR.Text)
 
                     If FrameMat.Rows.Count = 0 Then
-                        frmalarm.WarningTimeout("QR Frame(" & tbRevQR.Text & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input")
-                        frmalarm.ShowDialog()
+                        m_frmWarningDialog("QR Frame(" & tbRevQR.Text & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input", True)
 
                         Dim frmFrameMan As New frmFrameInputManual
                         If frmFrameMan.ShowDialog = Windows.Forms.DialogResult.OK Then
@@ -73,8 +69,7 @@ Public Class frmInputMaterial
                     Me.DialogResult = Windows.Forms.DialogResult.OK
 
                 Catch ex As Exception
-                    frmalarm.WarningTimeout("Exception Error กรุณา ตรวจสอบ Catch Log")
-                    frmalarm.ShowDialog()
+                    m_frmWarningDialog("Exception Error กรุณา ตรวจสอบ Catch Log", True)
                     tbRevQR.Text = ""
                     tbRevQR.Focus()
                 End Try
@@ -134,11 +129,9 @@ Public Class frmInputMaterial
     End Sub
 
     Private Sub Button10_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button10.Click
-        Dim frmalarm As New frmWarning
         If lbCaption.Text.Contains("Preform") = True Then
             If PreformCheck("MAT," & tbInputMan.Text) = False Then
-                frmalarm.WarningTimeout(m_PreformAlarm)
-                frmalarm.ShowDialog()
+                m_frmWarningDialog(m_PreformAlarm, True)
             Else
                 Me.DialogResult = Windows.Forms.DialogResult.OK
             End If
@@ -146,8 +139,7 @@ Public Class frmInputMaterial
         ElseIf lbCaption.Text.Contains("Frame") = True Then
 
             If tbInputMan.Text.Length <> 12 OrElse IsNumeric(tbInputMan.Text) = False Then
-                frmalarm.WarningTimeout("QR Framไม่ถูกต้องกรุณาตรวจสอบ ค่าที่อ่านได้คือ (" & tbInputMan.Text & ")")
-                frmalarm.ShowDialog()
+                m_frmWarningDialog("QR Framไม่ถูกต้องกรุณาตรวจสอบ ค่าที่อ่านได้คือ (" & tbInputMan.Text & ")", True)
                 tbInputMan.Focus()
                 Exit Sub
             End If
@@ -159,8 +151,7 @@ Public Class frmInputMaterial
                 FrameMatAdapter.FrameMaterail_IS(FrameMat, tbInputMan.Text)
 
                 If FrameMat.Rows.Count = 0 Then
-                    frmalarm.WarningTimeout("QR Frame(" & tbInputMan.Text & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input")
-                    frmalarm.ShowDialog()
+                    m_frmWarningDialog("QR Frame(" & tbInputMan.Text & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input", True)
 
                     Dim frmFrameMan As New frmFrameInputManual
                     If frmFrameMan.ShowDialog = Windows.Forms.DialogResult.OK Then
@@ -185,8 +176,7 @@ Public Class frmInputMaterial
                 Me.DialogResult = Windows.Forms.DialogResult.OK
 
             Catch ex As Exception
-                frmalarm.WarningTimeout("Exception Error กรุณา ตรวจสอบ Catch Log")
-                frmalarm.ShowDialog()
+                m_frmWarningDialog("Exception Error กรุณา ตรวจสอบ Catch Log", True)
                 tbRevQR.Text = ""
                 tbRevQR.Focus()
             End Try

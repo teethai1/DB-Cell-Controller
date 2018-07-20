@@ -52,6 +52,7 @@ Public Class ProcessForm
     Dim c_Buffer As String
     Dim c_PreviousCommand As String
     Dim c_MapUploadXmlPath As String = My.Application.Info.DirectoryPath & "\CurrentWafer.xml"
+    Private c_Resize As Resize = New Resize()
     'Explain Event  ----------------------------------------------------------------------------------------------------------------------
 
     'Event E_MakeAlarmCellCon                   : Display Alarm of processing(Code) in table
@@ -104,7 +105,7 @@ Public Class ProcessForm
     Dim c_TypeChangeMode As Boolean = False
     Dim c_RepeatInput As Boolean = False
     Dim c_FrmFinal As frmFinalInspection
-
+    Dim c_LotSetUp As Boolean = False
     Structure AlarmKeys
         Dim AlarmID As Integer
         Dim AlarmMessage As String
@@ -173,7 +174,6 @@ Public Class ProcessForm
         RaiseEvent E_Update_dgvProductionDetail(itemID, type, action, location)
     End Sub
     Private Sub Update_dgvProductionInfoEnd(ByVal _UnloadCarrierID As String, ByVal LotNo As String, Optional ByVal Count As String = "", Optional ByVal Remark As String = "")
-
         RaiseEvent E_Update_dgvProductionInfoEnd(_UnloadCarrierID, LotNo, Count, Remark)
     End Sub
 
@@ -213,7 +213,7 @@ Public Class ProcessForm
             Me.BackColor = Color.Red
         End If
 
-        lbMcNo.Text = My.Settings.EquipmentNo
+        ' lbMcNo.Text = My.Settings.EquipmentNo
 
         If My.Settings.SECS_Enable Then
             If m_DefinedReportDic.Count = 0 Then
@@ -246,14 +246,10 @@ Public Class ProcessForm
             End Try
 
             btLotStart1024.Visible = False
-            btStart.Visible = False
             btSet1024.Visible = False
-            btSet1284.Visible = False
 
             btFrame1024.Visible = False
-            btnFrameQR.Visible = False
             btPreform1024.Visible = False
-            btnPreformQR.Visible = False
 
         Else
             CountGoodDiesTimer.Enabled = False
@@ -289,17 +285,6 @@ DBxServerEndLoop:
         Catch ex As Exception    'Net Work Error
 
         End Try
-        If My.Settings.Resolution = "1280x1024" Then
-            panel1284x1024.Visible = True
-            panel1024x768.Visible = False
-            Me.Size = New Size(1280, 1024)
-            MDIParent1.MinimumSize = New Size(1280, 1024)
-        ElseIf My.Settings.Resolution = "1024x768" Then
-            panel1284x1024.Visible = False
-            panel1024x768.Visible = True
-            Me.Size = New Size(1024, 768)
-            MDIParent1.MinimumSize = New Size(1024, 768)
-        End If
 
         If My.Settings.WaferMappingUse = False Then
             lbCheckState.Text = "No checking"
@@ -314,10 +299,8 @@ DBxServerEndLoop:
 
         If My.Settings.SECS_Enable = True Then
             btSet1024.Visible = True
-            btSet1284.Visible = True
         Else
             btSet1024.Visible = False
-            btSet1284.Visible = False
         End If
 
         Try
@@ -344,8 +327,8 @@ DBxServerEndLoop:
         Dim tmpStr As String
 
         tmpStr = "MCNo=" & My.Settings.EquipmentNo
-        tmpStr = tmpStr & "&LotNo=" & lbLotNo.Text
-        If lbStartTime.Text <> "" Then 'AndAlso lbEndTime.Text = "" Then
+        tmpStr = tmpStr & "&LotNo=" & CellConTag.LotID
+        If CellConTag.LotStartTime <> Nothing Then 'AndAlso lbEndTime.Text = "" Then
             tmpStr = tmpStr & "&MCStatus=Running"
         Else
             tmpStr = tmpStr & "&MCStatus=Stop"
@@ -368,8 +351,8 @@ DBxServerEndLoop:
     Private Sub ByAutoToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ByAutoToolStripMenuItem.Click  '161019 \783
         Try
             Dim requestUrl As String             'Call Andon by pass parameter 161029 \783
-            requestUrl = String.Format("http://webserv.thematrix.net/andontmn/Client/Default.aspx?p={0}&mc={1}&lot={2}&pkg={3}&dv={4}&line={5}&op={6}", _
-                                        My.Settings.ProcessName, lbMcNo.Text, lbLotNo.Text, lbPackage.Text, lbDevice.Text, "", lbOPID.Text)
+            requestUrl = String.Format("http://webserv.thematrix.net/andontmn/Client/Default.aspx?p={0}&mc={1}&lot={2}&pkg={3}&dv={4}&line={5}&op={6}",
+                                        My.Settings.ProcessName, My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.Package, CellConTag.DeviceName, "", CellConTag.OPID)
             Call Shell("C:\Program Files\Internet Explorer\iexplore.exe " & requestUrl, AppWinStyle.NormalFocus)
 
 
@@ -566,7 +549,6 @@ DBxServerEndLoop:
                                             CellConTag.StateCellCon = CellConState.LotStart
                                             If CellConTag.LotStartTime = Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> "" Then
                                                 LotStartup()
-                                                lbStartTime.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 lbStart1024.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 m_frmWarningDialog("กรุณาทำ First Insp.", False, 60000)
                                             ElseIf CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing Then
@@ -604,7 +586,6 @@ DBxServerEndLoop:
                                             CellConTag.StateCellCon = CellConState.LotStart
                                             If CellConTag.LotStartTime = Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> "" Then
                                                 LotStartup()
-                                                lbStartTime.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 lbStart1024.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 m_frmWarningDialog("กรุณาทำ First Insp.", False, 60000)
                                             ElseIf CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing Then
@@ -638,7 +619,6 @@ DBxServerEndLoop:
                                     If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> Nothing Then
                                         Dim GoodDies As Integer = CInt(sndMesData.SV(0))
                                         CellConTag.TotalGood = GoodDies
-                                        lbGoodTotal.Text = CStr(GoodDies)
                                         lbGood1024.Text = CStr(GoodDies)
                                         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
 
@@ -651,7 +631,6 @@ DBxServerEndLoop:
                                     If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> Nothing Then
                                         Dim GoodDies As Integer = CInt(sndMesData.SV(0))
                                         CellConTag.TotalGood = GoodDies
-                                        lbGoodTotal.Text = CStr(GoodDies)
                                         lbGood1024.Text = CStr(GoodDies)
                                         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
 
@@ -673,7 +652,6 @@ DBxServerEndLoop:
                                         Case EquipmentStateCanon.EXECUTING
                                             If CellConTag.LotStartTime = Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> "" Then
                                                 LotStartup()
-                                                lbStartTime.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 lbStart1024.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
                                                 m_frmWarningDialog("กรุณาทำ First Insp.", False, 60000)
                                             ElseIf CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing Then 'Running+
@@ -699,12 +677,15 @@ DBxServerEndLoop:
                                                 Catch ex As Exception
                                                 End Try
                                             End If
+                                            If c_LotSetUp = True Then
+                                                SetupLot()
+                                            End If
+                                            c_LotSetUp = False
                                     End Select
                                 Case "112" 'EquipmentStateCanon.EXECUTING
                                     If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> Nothing Then
                                         Dim GoodDies As Integer = CInt(sndMesData.SV(0))
                                         CellConTag.TotalGood = GoodDies
-                                        lbGoodTotal.Text = CStr(GoodDies)
                                         lbGood1024.Text = CStr(GoodDies)
                                         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                                         Try
@@ -1068,7 +1049,7 @@ DBxServerEndLoop:
             Case CStr(108) 'Canon Alarm
                 If m_Equipment.AlarmID = "101003" AndAlso m_Equipment.AlarmState = AlarmState.AlarmSet Then
                     If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> "" Then   'And CellConTag.Torinokoshi = False 
-                        LockMachine()
+                        'LockMachine()
                         LotEndSecsGem(CInt(m_Equipment.GoodPcs))
                     End If
                 End If
@@ -1184,29 +1165,24 @@ DBxServerEndLoop:
                         'Alarm Major Count Canon
                         Case 22001 'Pick up
                             CellConTag.AlarmPickup = CShort(CellConTag.AlarmPickup + 1)
-                            lbalmPickup1280.Text = CStr(CellConTag.AlarmPickup)
                             lbalmPickup1024.Text = CStr(CellConTag.AlarmPickup)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                             'Preform ไม่มี
                         Case 22002 'Bonder
                             CellConTag.AlarmBonder = CShort(CellConTag.AlarmBonder + 1)
                             lbalmBonder1024.Text = CStr(CellConTag.AlarmBonder)
-                            lbalmBonder1280.Text = CStr(CellConTag.AlarmBonder)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 4136 'Frame Out
                             CellConTag.AlarmFrameOut = CShort(CellConTag.AlarmFrameOut + 1)
                             lbalmFrameOut1024.Text = CStr(CellConTag.AlarmFrameOut)
-                            lbalmFrameOut1280.Text = CStr(CellConTag.AlarmFrameOut)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 11083 'Bridge Inspection
                             CellConTag.AlarmBridgeInsp = CShort(CellConTag.AlarmBridgeInsp + 1)
                             lbalmBridge1024.Text = CStr(CellConTag.AlarmBridgeInsp)
-                            lbalmBridge1280.Text = CStr(CellConTag.AlarmBridgeInsp)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 13080 'Preform Inspection
                             CellConTag.AlarmPreformInsp = CShort(CellConTag.AlarmPreformInsp + 1)
                             lbalmPreformInsp1024.Text = CStr(CellConTag.AlarmPreformInsp)
-                            lbalmPreformInsp1280.Text = CStr(CellConTag.AlarmPreformInsp)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                     End Select
                 ElseIf My.Settings.MCType = "2100HS" Then
@@ -1215,32 +1191,26 @@ DBxServerEndLoop:
                         Case 252182592 'Pickup
                             CellConTag.AlarmPickup = CShort(CellConTag.AlarmPickup + 1)
                             lbalmPickup1024.Text = CStr(CellConTag.AlarmPickup)
-                            lbalmPickup1280.Text = CStr(CellConTag.AlarmPickup)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252313679 'Bonder
                             CellConTag.AlarmBonder = CShort(CellConTag.AlarmBonder + 1)
                             lbalmBonder1024.Text = CStr(CellConTag.AlarmBonder)
-                            lbalmBonder1280.Text = CStr(CellConTag.AlarmBonder)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252510280 'FrameOut
                             CellConTag.AlarmFrameOut = CShort(CellConTag.AlarmFrameOut + 1)
                             lbalmFrameOut1024.Text = CStr(CellConTag.AlarmFrameOut)
-                            lbalmFrameOut1280.Text = CStr(CellConTag.AlarmFrameOut)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252641319 'Bridge Inspection
                             CellConTag.AlarmBridgeInsp = CShort(CellConTag.AlarmBridgeInsp + 1)
                             lbalmBridge1024.Text = CStr(CellConTag.AlarmBridgeInsp)
-                            lbalmBridge1280.Text = CStr(CellConTag.AlarmBridgeInsp)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252706835 'PReform Inps.
                             CellConTag.AlarmPreformInsp = CShort(CellConTag.AlarmPreformInsp + 1)
                             lbalmPreformInsp1024.Text = CStr(CellConTag.AlarmPreformInsp)
-                            lbalmPreformInsp1280.Text = CStr(CellConTag.AlarmPreformInsp)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252706838 'PReform Inps.
                             CellConTag.AlarmPreformInsp = CShort(CellConTag.AlarmPreformInsp + 1)
                             lbalmPreformInsp1024.Text = CStr(CellConTag.AlarmPreformInsp)
-                            lbalmPreformInsp1280.Text = CStr(CellConTag.AlarmPreformInsp)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
                         Case 252641291 'Postbond Inspection          
                         Case 252641292 'Postbond Inspection
@@ -1253,46 +1223,37 @@ DBxServerEndLoop:
                         Case 38524 'Pickup
                             CellConTag.AlarmPickup = CShort(CellConTag.AlarmPickup + 1)
                             lbalmPickup1024.Text = CStr(CellConTag.AlarmPickup)
-                            lbalmPickup1280.Text = CStr(CellConTag.AlarmPickup)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45660 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45661 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45670 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45671 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45672 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 45673 'Preform
                             CellConTag.AlarmPreform = CShort(CellConTag.AlarmPreform + 1)
                             lbalmPreform1024.Text = CStr(CellConTag.AlarmPreform)
-                            lbalmPreform1280.Text = CStr(CellConTag.AlarmPreform)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 38563 'Bonder
                             CellConTag.AlarmBonder = CShort(CellConTag.AlarmBonder + 1)
-                            lbalmBonder1280.Text = CStr(CellConTag.AlarmBonder)
                             lbalmBonder1024.Text = CStr(CellConTag.AlarmBonder)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 49505 'FrameOut
                             CellConTag.AlarmFrameOut = CShort(CellConTag.AlarmFrameOut + 1)
-                            lbalmFrameOut1280.Text = CStr(CellConTag.AlarmFrameOut)
                             lbalmFrameOut1024.Text = CStr(CellConTag.AlarmFrameOut)
                             WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
                         Case 49508 'FrameOut
@@ -1307,7 +1268,6 @@ DBxServerEndLoop:
                 End If
         End Select
         lbAlmTotal1024.Text = CellConTag.TotalAlarm.ToString
-        lbAlmTotal1280.Text = CellConTag.TotalAlarm.ToString
         SaveAlarmInfoTable()
     End Sub
 
@@ -1393,7 +1353,6 @@ DBxServerEndLoop:
 
         res = RohmMapConvert.Read(WaferMapDir & "\" & OprData.WaferLotID, S12F3R.FNLOC, S12F3R.NULBC, S12F3R.BCEQU, "M", WaferIndex)
 
-        lbWaferNo.Text = S12F3R.MID
         OprData.WaferID = S12F3R.MID
 
         If (CellConTag.WaferID.Exists(Function(x) x = OprData.WaferID)) Then     'if exist remove  and new add
@@ -1487,7 +1446,7 @@ OKAns:
 
             'Coding here if Ans OK
 EndLoop:
-            lbLotInfoTDC.Text = CellConTag.LSReply
+            ' lbLotInfoTDC.Text = CellConTag.LSReply
             WriteToXmlCellcon(CellconObjPath & "\" & Rpl.LotNo & ".xml", CellConTag)  '170126 \783 CellconTag
 
         Catch ex As Exception
@@ -1525,7 +1484,7 @@ OKAns:
             'Coding here if Ans OK
 
 EndLoop:
-            lbLotInfoTDC.Text = Rpl.ErrorCode & " : " & " " & Rpl.ErrorMessage
+            'lbLotInfoTDC.Text = Rpl.ErrorCode & " : " & " " & Rpl.ErrorMessage
             WriteToXmlCellcon(CellconObjPath & "\" & Rpl.LotNo & ".xml", CellConTag)  '170126 \783 CellconTag
             'If CellconTagList.ContainsKey(Rpl.LotNo) Then
             '    CellconTagList.Remove(Rpl.LotNo)
@@ -1666,51 +1625,6 @@ EndLoop:
 #End Region
 
 #Region "Lot Management"
-
-
-
-
-    Private Sub Lotstart(Optional ByVal LsMode As RunModeType = RunModeType.Normal)
-
-        Dim datex As Date = Now
-        lbStartTime.Text = Format(datex, "yyyy/MM/dd HH:mm:ss")
-        ' CellConTag.LotStartTime = lbStartTime.Text
-        RaiseEvent E_LSCheck(lbMcNo.Text, lbLotNo.Text, datex, lbOPID.Text, LsMode)
-        If Not My.Settings.TDC_Enable Then
-            CellConTag.LSReply = "TDC Disable"
-            WriteToXmlCellcon(CellconObjPath & "\" & lbLotNo.Text & ".xml", CellConTag)  '170126 \783 CellconTag
-        End If
-
-    End Sub
-
-
-    Private Sub LotEnd(Optional ByVal LeMode As EndModeType = EndModeType.Normal)
-
-        Dim datex As Date = Now
-        lbEndTime.Text = Format(datex, "yyyy/MM/dd HH:mm:ss")
-        ' CellConTag.LotEndTime = lbEndTime.Text
-        LotEndFlag = True        '  
-        Try
-            CellConTag.TotalGoodPcs = CStr(CInt(CellConTag.GoodCat1 + CellConTag.GoodCat2))
-            CellConTag.TotalNGPcs = CStr(CInt(CellConTag.NGbin1 + CellConTag.NGbin2 + CellConTag.NGbin3 + CellConTag.NGbin4 + CellConTag.NGbin5 + CellConTag.NGbin6))
-            lbNGTotal.Text = CellConTag.TotalNGPcs
-            lbGoodTotal.Text = CellConTag.TotalGoodPcs
-
-
-            RaiseEvent E_LECheck(lbMcNo.Text, lbLotNo.Text, datex, CInt(lbGoodTotal.Text), CInt(lbNGTotal.Text), lbOPID.Text, LeMode)
-            CleanLog(1000) '1G backup limit
-            BackUpLotClean()
-            If Not My.Settings.TDC_Enable Then
-                CellConTag.LEReply = "TDC Disable"
-                WriteToXmlCellcon(CellconObjPath & "\" & lbLotNo.Text & ".xml", CellConTag)  '170126 \783 CellconTag
-                CellConTag = New CellConObj              'Clear data
-            End If
-
-        Catch ex As Exception
-            SaveCatchLog(ex.ToString, "LotEnd()")
-        End Try
-    End Sub
-
 
 #End Region
 
@@ -1923,18 +1837,6 @@ EndLoop:
     End Sub
 
 
-    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button4.Click
-        Lotstart(CType(CellConTag.LSMode, RunModeType))
-        'RaiseEvent E_MakeAlarmCellCon("5555", "", "", "")
-
-    End Sub
-
-    Private Sub Button5_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button5.Click
-        LotEnd(EndModeType.Normal)
-    End Sub
-
-
-
     Private Function PreformCondition(ByVal exp As Date) As String
         Dim ret As String = ""
         Dim MinTotal As Long
@@ -1960,107 +1862,72 @@ EndLoop:
             FlagExpPreform = True
             Select Case strColor
                 Case PreformStatus.Blue40.ToString
-                    lbPreformLife2.BackColor = Color.Blue
-                    lbPreformLife2.ForeColor = Color.White
 
                     lbPreformExp2_1024.BackColor = Color.Blue
                     lbPreformExp2_1024.ForeColor = Color.White
 
                 Case PreformStatus.Sky32_40.ToString
-                    lbPreformLife2.BackColor = Color.SkyBlue
-                    lbPreformLife2.ForeColor = Color.Black
 
                     lbPreformExp2_1024.BackColor = Color.SkyBlue
                     lbPreformExp2_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Green24_32.ToString
 
-                    lbPreformLife2.BackColor = Color.GreenYellow
-                    lbPreformLife2.ForeColor = Color.Black
-
                     lbPreformExp2_1024.BackColor = Color.GreenYellow
                     lbPreformExp2_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Yello10_24.ToString
-                    lbPreformLife2.BackColor = Color.Yellow
-                    lbPreformLife2.ForeColor = Color.Black
 
                     lbPreformExp2_1024.BackColor = Color.Yellow
                     lbPreformExp2_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Orange4_10.ToString
-                    lbPreformLife2.BackColor = Color.Orange
-                    lbPreformLife2.ForeColor = Color.Black
-
                     lbPreformExp2_1024.BackColor = Color.Orange
                     lbPreformExp2_1024.ForeColor = Color.Black
 
                 Case PreformStatus.DarkOrange0_4.ToString
-                    lbPreformLife2.BackColor = Color.DarkOrange
-                    lbPreformLife2.ForeColor = Color.Black
 
                     lbPreformExp2_1024.BackColor = Color.DarkOrange
                     lbPreformExp2_1024.ForeColor = Color.Black
 
                 Case Else
-                    lbPreformLife2.BackColor = Color.Red
-                    lbPreformLife2.ForeColor = Color.Black
 
                     lbPreformExp2_1024.BackColor = Color.Red
                     lbPreformExp2_1024.ForeColor = Color.Black
                     FlagExpPreform = False
             End Select
         ElseIf OprData.PreformExpDate1 <> Nothing Then 'Preform1 then
-            lbPreformLife2.BackColor = Color.LightGreen
+
             strColor = PreformExpColor(OprData.PreformExpDate1)
             FlagExpPreform = True
             Select Case strColor
                 Case PreformStatus.Blue40.ToString
-                    lbPreformLife1.BackColor = Color.Blue
-                    lbPreformLife1.ForeColor = Color.White
-
                     lbPreformExp1_1024.BackColor = Color.Blue
                     lbPreformExp1_1024.ForeColor = Color.White
 
                 Case PreformStatus.Sky32_40.ToString
-                    lbPreformLife1.BackColor = Color.SkyBlue
-                    lbPreformLife1.ForeColor = Color.Black
-
                     lbPreformExp1_1024.BackColor = Color.SkyBlue
                     lbPreformExp1_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Green24_32.ToString
-                    lbPreformLife1.BackColor = Color.GreenYellow
-                    lbPreformLife1.ForeColor = Color.Black
-
                     lbPreformExp1_1024.BackColor = Color.GreenYellow
                     lbPreformExp1_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Yello10_24.ToString
-                    lbPreformLife1.BackColor = Color.Yellow
-                    lbPreformLife1.ForeColor = Color.Black
 
                     lbPreformExp1_1024.BackColor = Color.Yellow
                     lbPreformExp1_1024.ForeColor = Color.Black
 
                 Case PreformStatus.Orange4_10.ToString
-                    lbPreformLife1.BackColor = Color.Orange
-                    lbPreformLife1.ForeColor = Color.Black
-
                     lbPreformExp1_1024.BackColor = Color.Orange
                     lbPreformExp1_1024.ForeColor = Color.Black
 
                 Case PreformStatus.DarkOrange0_4.ToString
-                    lbPreformLife1.BackColor = Color.DarkOrange
-                    lbPreformLife1.ForeColor = Color.Black
 
                     lbPreformExp1_1024.BackColor = Color.DarkOrange
                     lbPreformExp1_1024.ForeColor = Color.Black
 
                 Case Else
-                    lbPreformLife1.BackColor = Color.Red
-                    lbPreformLife1.ForeColor = Color.Black
-
                     lbPreformExp1_1024.BackColor = Color.Red
                     lbPreformExp1_1024.ForeColor = Color.Black
 
@@ -2097,36 +1964,23 @@ EndLoop:
     End Function
 
 
-    Private Sub KeysEnd()
+    Private Sub MaterialDefaultColor()
         'lbFrameQR1.BackColor = Color.LightCyan
         'lbFrameQR2.BackColor = Color.LightGreen
-        'lbPreformQR1.BackColor = Color.LightCyan
-        'lbPreformQR2.BackColor = Color.LightGreen
         'lbFrameLotNo1.BackColor = Color.LightCyan
         'lbFrameLotNo2.BackColor = Color.LightGreen
         'lbFrameType1.BackColor = Color.LightCyan
         'lbFrameType2.BackColor = Color.LightGreen
-        MaterialDefaultColor()
-
-    End Sub
-
-    Private Sub MaterialDefaultColor()
-        lbFrameQR1.BackColor = Color.LightCyan
-        lbFrameQR2.BackColor = Color.LightGreen
-        lbFrameLotNo1.BackColor = Color.LightCyan
-        lbFrameLotNo2.BackColor = Color.LightGreen
-        lbFrameType1.BackColor = Color.LightCyan
-        lbFrameType2.BackColor = Color.LightGreen
-        lbPreformQR1.BackColor = Color.LightCyan
-        lbPreformQR2.BackColor = Color.LightGreen
-        lbPreformType1.BackColor = Color.LightCyan
-        lbPreformType2.BackColor = Color.LightGreen
-        lbPreformLife1.BackColor = Color.LightCyan
-        lbPreformLife2.BackColor = Color.LightGreen
-        lbPreformLotNo1.BackColor = Color.LightCyan
-        lbPreformLotNo2.BackColor = Color.LightGreen
-        lbPreformLife1.ForeColor = Color.Black
-        lbPreformLife2.ForeColor = Color.Black
+        'lbPreformQR1.BackColor = Color.LightCyan
+        'lbPreformQR2.BackColor = Color.LightGreen
+        'lbPreformType1.BackColor = Color.LightCyan
+        'lbPreformType2.BackColor = Color.LightGreen
+        'lbPreformLife1.BackColor = Color.LightCyan
+        'lbPreformLife2.BackColor = Color.LightGreen
+        'lbPreformLotNo1.BackColor = Color.LightCyan
+        'lbPreformLotNo2.BackColor = Color.LightGreen
+        'lbPreformLife1.ForeColor = Color.Black
+        'lbPreformLife2.ForeColor = Color.Black
 
     End Sub
     Public Function QRWorkingSlipInputInitailCheck(ByVal BeAfRead As Boolean, Optional ByVal WorkSlipQR As WorkingSlipQRCode = Nothing) As Boolean   'Before Read = True, After Read =False
@@ -2135,21 +1989,20 @@ EndLoop:
         'Before Read Working Slip check ===================================================================================================
         '------------------------------
         If BeAfRead Then
-            If lbFrameLotNo1.Text = "" Then
+            If CellConTag.FrameLotNo_1st = "" Then
                 m_QRReadAlarm = "ยังไม่ได้ใส่ข้อมูล Material Frame : LotNo"
                 Return False
-            ElseIf lbFrameQR1.Text = "" Then
+            ElseIf CellConTag.FrameSeqNo_1st = "" Then
                 m_QRReadAlarm = "ยังไม่ได้ใส่ข้อมูล Material Frame : FrameQR"
                 Return False
-            ElseIf lbFrameType1.Text = "" Then
+            ElseIf CellConTag.FrameType_1st = "" Then
                 m_QRReadAlarm = "ยังไม่ได้ใส่ข้อมูล Material Frame : FrameType"
                 Return False
             End If
-            If lbPreformLife1.Text = "" Then
+            If CellConTag.PreforExpireDate_1st = Nothing Then
                 m_QRReadAlarm = "ยังไม่ได้ใส่ข้อมูล Material Preform : PreformLife"
                 Return False
             End If
-
 
             If FlagExpPreform = False Then
                 m_QRReadAlarm = "Preform หมดอายุ กรุณาเปลี่ยนด้วยครับ "
@@ -2168,7 +2021,7 @@ EndLoop:
                 Return False
             End If
 
-            If lbPreformLife2.Text <> "" Then
+            If CellConTag.PreformLotNo_2nd <> "" Then
                 CellConTag.PreformLotNo_1st = CellConTag.PreformLotNo_2nd
                 CellConTag.PreforInputDate_1st = CellConTag.PreforInputDate_2nd
                 CellConTag.PreforExpireDate_1st = CellConTag.PreforExpireDate_2nd
@@ -2196,16 +2049,16 @@ EndLoop:
         Else
             Dim strPreformType As String
             Dim strFrameTYpe As String
-            If lbPreformType2.Text.Trim <> "" Then      'ถ้ามี Preform1,2 ให้ตรวจสอบอันหลัง
-                strPreformType = lbPreformType2.Text.Replace("MAT-", "")
+            If CellConTag.PreformType_2nd.Trim <> "" Then      'ถ้ามี Preform1,2 ให้ตรวจสอบอันหลัง
+                strPreformType = CellConTag.PreformType_2nd.Replace("MAT-", "")
             Else
-                strPreformType = lbPreformType1.Text.Replace("MAT-", "")
+                strPreformType = CellConTag.PreformType_1st.Replace("MAT-", "")
             End If
 
-            If lbFrameType2.Text <> "" Then
-                strFrameTYpe = lbFrameType2.Text.ToUpper.Trim
+            If CellConTag.FrameType_2nd <> "" Then
+                strFrameTYpe = CellConTag.FrameType_2nd.ToUpper.Trim
             Else
-                strFrameTYpe = lbFrameType1.Text.ToUpper.Trim
+                strFrameTYpe = CellConTag.FrameType_1st.ToUpper.Trim
             End If
 
             If My.Settings.MCType = "Canon-D10R" And My.Settings.SECS_Enable = True Then
@@ -2226,18 +2079,18 @@ EndLoop:
             '    End If
             'Else
             If WorkSlipQR.FrameType.Contains(" ") = True Then
-                Dim strFrameSpit As String() = WorkSlipQR.FrameType.Split(CChar(" "))
-                If strFrameTYpe <> strFrameSpit(0) Then
-                    m_QRReadAlarm = "Material System FrameType:(" & strFrameTYpe & ") ไม่ตรงกับ Working Slip FrameType:(" & WorkSlipQR.FrameType.ToUpper.Trim & ")"
-                    Return False
+                    Dim strFrameSpit As String() = WorkSlipQR.FrameType.Split(CChar(" "))
+                    If strFrameTYpe <> strFrameSpit(0) Then
+                        m_QRReadAlarm = "Material System FrameType:(" & strFrameTYpe & ") ไม่ตรงกับ Working Slip FrameType:(" & WorkSlipQR.FrameType.ToUpper.Trim & ")"
+                        Return False
+                    End If
+                Else
+                    If strFrameTYpe <> WorkSlipQR.FrameType.ToUpper.Trim Then
+                        m_QRReadAlarm = "Material System FrameType:(" & strFrameTYpe & ") ไม่ตรงกับ Working Slip FrameType:(" & WorkSlipQR.FrameType.ToUpper.Trim & ")"
+                        Return False
+                    End If
                 End If
-            Else
-                If strFrameTYpe <> WorkSlipQR.FrameType.ToUpper.Trim Then
-                    m_QRReadAlarm = "Material System FrameType:(" & strFrameTYpe & ") ไม่ตรงกับ Working Slip FrameType:(" & WorkSlipQR.FrameType.ToUpper.Trim & ")"
-                    Return False
-                End If
-            End If
-            'End If
+            ' End If
 
 
             If PackageDeviceComparePreform(strPreformType, WorkSlipQR) = False Then 'ตรวจสอบว่า Device ,Package สามารถใช้กับ Preform ตัวนี้ได้หรือไม่
@@ -2300,201 +2153,10 @@ EndLoop:
         Return ret
     End Function
 
-
-
-
-
-
-
-
-    Private Sub lbFrameQR1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim frmalarm As New frmWarning
-        If lbStartTime.Text <> "" And lbEndTime.Text = "" Then  'if machine running can not change 1st Frame
-            frmalarm.WarningTimeout("Frame1 ไม่สามารถเปล่ยนค่านี้ได้ขณะเครื่อง Running ")
-            frmalarm.ShowDialog()
-            Exit Sub
-        End If
-
-        If lbFrameLotNo1.Text <> "" Then
-            If MsgBox("การดำเนินการ Manual Input FrameQR ข้อมูลเดิมจะถูกล้าง ยืนยันกด 'OK'", MsgBoxStyle.OkCancel, "Manual Frame Input") = MsgBoxResult.Cancel Then
-                Exit Sub
-            End If
-            CellConTag.FrameLotNo_1st = ""
-            CellConTag.FrameSeqNo_1st = ""
-            CellConTag.FrameType_1st = ""
-
-            CellConTag.FrameLotNo_2nd = ""
-            CellConTag.FrameSeqNo_2nd = ""
-            CellConTag.FrameType_2nd = ""
-
-            UpdateDisplayMaterial()
-
-        End If
-
-        lbFrameQR1.Focus()
-        lbFrameQR1.BackColor = Color.LightSteelBlue
-        lbFrameQR2.BackColor = Color.LightGreen
-
-        KeyBoardCallDialog(lbFrameQR1, True, Nothing, "lbFrameQR1")
-        KeysEnd()
-        If lbFrameQR1.Text.Length <> 12 AndAlso lbFrameQR1.Text <> "" Then
-            frmalarm.WarningTimeout("QR Frame1 ไม่ถูกต้องกรุณาตรวจสอบ")
-            frmalarm.ShowDialog()
-            lbFrameQR1.Text = ""
-            Exit Sub
-        End If
-        CellConTag.FrameSeqNo_1st = lbFrameQR1.Text
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-    End Sub
-
-
-    Private Sub lbFrameQR2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim frmAlarm As New frmWarning
-        If lbFrameLotNo1.Text <> "" AndAlso CellConTag.LotStartTime <> Nothing AndAlso CellConTag.LotEndTime = Nothing Then
-            If MsgBox("การดำเนินการ Manual Input FrameQR ข้อมูลเดิมจะถูกล้าง ยืนยันกด 'OK'", MsgBoxStyle.OkCancel, "Manual Frame Input") = MsgBoxResult.Cancel Then
-                Exit Sub
-            End If
-            CellConTag.FrameLotNo_2nd = ""
-            CellConTag.FrameSeqNo_2nd = ""
-            CellConTag.FrameType_2nd = ""
-            UpdateDisplayMaterial()
-        End If
-
-        If Not (lbStartTime.Text <> "" And lbEndTime.Text = "") Then
-            frmAlarm.WarningTimeout("ไม่สารถใส่ค่า FrameQR2 ได้ตอนนี้ FrameQR2 ใส่ได้หลังจาก StartTime เท่านั้น")
-            frmAlarm.ShowDialog()
-            Exit Sub
-        End If
-        lbFrameQR2.Focus()
-        If lbFrameQR1.Text = "" Then
-            lbFrameQR1.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameQR1, True, Nothing, "lbFrameQR1")
-        Else
-            lbFrameQR2.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameQR2, True, Nothing, "lbFrameQR2")
-        End If
-        KeysEnd()
-
-        If lbFrameQR2.Text.Length <> 12 And lbFrameQR2.Text <> "" Then
-            frmAlarm.WarningTimeout("QR Frame2 ไม่ถูกต้องกรุณาตรวจสอบ")
-            frmAlarm.ShowDialog()
-            lbFrameQR2.Text = ""
-            Exit Sub
-        End If
-
-
-        CellConTag.FrameSeqNo_2nd = lbFrameQR2.Text
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-
-    End Sub
-
-    Private Sub lbFrameLotNo1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-
-        If lbFrameQR1.Text = "" Then
-            Dim frmAlarm As New frmWarning
-            frmAlarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-            frmAlarm.ShowDialog()
-            Exit Sub
-        End If
-
-        lbFrameLotNo1.Focus()
-        lbFrameLotNo1.BackColor = Color.LightSteelBlue
-
-        KeyBoardCallDialog(lbFrameLotNo1, False, My.Resources.Material_Frame, "lbFrameLotNo1")
-
-        CellConTag.FrameLotNo_1st = lbFrameLotNo1.Text
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-
-        KeysEnd()
-
-    End Sub
-
-    Private Sub lbFrameLotNo2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim frmalarm As New frmWarning
-        lbFrameLotNo2.Focus()
-        If lbFrameLotNo1.Text = "" Then
-            If lbFrameQR1.Text = "" Then
-                frmalarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-                frmalarm.ShowDialog()
-                Exit Sub
-            End If
-            lbFrameLotNo1.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameLotNo1, False, My.Resources.Material_Frame, "lbFrameLotNo1")
-        Else
-            If lbFrameQR2.Text = "" Then
-                frmalarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-                frmalarm.ShowDialog()
-                Exit Sub
-            End If
-
-            lbFrameLotNo2.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameLotNo2, False, My.Resources.Material_Frame, "lbFrameLotNo2")
-        End If
-        KeysEnd()
-
-        CellConTag.FrameLotNo_2nd = lbFrameLotNo2.Text   'Lot_1st Save when LR
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-
-    End Sub
-
-
-
-    Private Sub lbFrameType1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim frmAlarm As New frmWarning
-        If lbStartTime.Text <> "" And lbEndTime.Text = "" Then  'if machine running can not change 1st Frame
-            frmAlarm.WarningTimeout("ไม่สามารถเปล่ยนค่านี้ได้ขณะเครื่อง Running")
-            frmAlarm.ShowDialog()
-            Exit Sub
-        End If
-        If lbFrameQR1.Text = "" Then
-            frmAlarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-            frmAlarm.ShowDialog()
-            Exit Sub
-        End If
-
-        lbFrameType1.Focus()
-        lbFrameType1.BackColor = Color.LightSteelBlue
-        KeyBoardCallDialog(lbFrameType1, False, My.Resources.Material_Frame, "lbFrameType1")
-        KeysEnd()
-        CellConTag.FrameType_1st = lbFrameType1.Text
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-    End Sub
-
-    Private Sub lbFrameType2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim frmAlarm As New frmWarning
-        lbFrameType2.Focus()
-        If lbFrameType1.Text = "" Then
-
-            If lbFrameQR1.Text = "" Then
-                frmAlarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-                frmAlarm.ShowDialog()
-                Exit Sub
-            End If
-            lbFrameType1.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameType1, False, My.Resources.Material_Frame, " lbFrameType1")
-        Else
-            If lbFrameQR2.Text = "" Then
-                frmAlarm.WarningTimeout("ต้องใส่ค่า FrameQR ก่อน")
-                frmAlarm.ShowDialog()
-                Exit Sub
-            End If
-            lbFrameType2.BackColor = Color.LightSteelBlue
-            KeyBoardCallDialog(lbFrameType2, False, My.Resources.Material_Frame, "lbFrameType2")
-        End If
-        KeysEnd()
-        CellConTag.FrameType_2nd = lbFrameType2.Text
-        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-
-
-    End Sub
-
-
-
 #End Region
 
 
-
-    Private Sub LotEndClick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btEnd.Click, btLotEnd1024.Click
+    Private Sub LotEndClick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btLotEnd1024.Click
 
         If My.Settings.MCType = "IDBW" Then
 
@@ -2519,7 +2181,7 @@ EndLoop:
                 WriteToXmlCellcon(CellconObjPath & "\" & CellConTag.LotID & ".xml", CellConTag)
                 WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
 
-                If picFirst.Visible = True Or picFirst1024.Visible = True Then
+                If picFirst1024.Visible = True Then
                     SaveLotEndToDbx()
                     CellConTag.StateCellCon = CellConState.LotEnd
                     m_frmWarningDialog("กรุณาทำ Final Insp.", False, 30000)
@@ -2744,12 +2406,7 @@ EndLoop:
 
     End Sub
 
-    Private Sub Button7_Click_1(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btStart.Click, btLotStart1024.Click
-
-        If My.Settings.MCType = "Canon-D10R" And My.Settings.SECS_Enable = True Then 'And lbEqState.Text = "Eq State" Then
-            RequestSVID_CurrentState()
-            Thread.Sleep(3000) 'รอสถานะ กรณีที่เปิดเครื่อแล้วมันไม่เชค สถานะ ครั้งเดียว
-        End If
+    Private Sub Button7_Click_1(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btLotStart1024.Click
 
         If CellConTag.LotStartTime = Nothing AndAlso CellConTag.LotEndTime <> Nothing AndAlso CellConTag.LotID = "" Then
             FinalInspCompleted()
@@ -2757,110 +2414,108 @@ EndLoop:
             Exit Sub
         End If
 
-        If CellConTag.LotID <> "" AndAlso CellConTag.LotStartTime <> Nothing Then  'กรอง QCMode  First A และ final Null 
-            Dim QCTable As New DBxDataSet.QCTableDataTable
-            Dim qcap As New DBxDataSetTableAdapters.QCTableTableAdapter
-            QCTable = qcap.GetData(CellConTag.LotID, CellConTag.LotStartTime)
-            For Each strdatarow As DBxDataSet.QCTableRow In QCTable.Rows
-                If strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellConTag.LotEndTime = Nothing Then
-                    m_frmWarningDialog("กรุณา End Lot ก่อน", False)
-                    Exit Sub
-                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellConTag.LotEndTime <> Nothing And strdatarow.IsLotEndTimeNull = False Then
-                    m_frmWarningDialog("กรุณาทำ Final Insp.", False)
-                    Exit Sub
-                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellConTag.LotEndTime <> Nothing Then
-                    m_frmWarningDialog("กรุณากดปุ่ม End เพื่อยืนยันจำนวนงาน , Alarm ด้วยครับ", False)
-                    Exit Sub
-                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = False Then
-                    FinalInspCompleted()
-                    WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-                    Exit Sub
-                ElseIf strdatarow.IsQCFirstLotModeNull = True And strdatarow.IsQCFinishLotModeNull = True Then
-                    m_frmWarningDialog("กรุณาทำ First Insp.", False)
-                    Exit Sub
-                End If
-            Next
-        End If
-
-
-        If My.Settings.SECS_Enable = True AndAlso Me.BackColor = Color.Red Then 'ถ้าเป็น Secsgem จะต้องเช็คก่อนส่ง
-            m_frmWarningDialog("กรุณเชื่อมต่อCellCon กับ M/C ด้วยครับ", False)
-            Exit Sub
-        ElseIf My.Settings.SECS_Enable = True Then
-            If My.Settings.MCType = "Canon-D10R" Then
-                If m_Equipment.EQStatusCanon <> EquipmentStateCanon.IDEL Then
-                    m_frmWarningDialog("สถานะเครื่องจักรตอนนี้ไม่พร้อมใช้งาน กรุณาตรวจสอบ", False)
-                    Exit Sub
-                End If
-            End If
-        End If
-
-
-        _WhenInputDataAlready = False
-        _WhenPreeSetUpButton = False
-
-        If QRWorkingSlipInputInitailCheck(True) = True Then
-            Dim frminput As New frmdisplayinput(Me)
-            frminput.lbcaption.Text = "กรุณาสแกน QR Code"
-            If frminput.ShowDialog = Windows.Forms.DialogResult.OK Then
-                Matparameter()
-                CellConTag = New CellConObj
-                CellConTag = Para
-
-                CellConTag.WaferLotNoFromDepyo = AllWaferLotNoFromDenpyo(CellConTag.LotID)
-                CellConTag.WaferLotNoListSplited = WaferLotNoSliter(CellConTag.WaferLotNoFromDepyo)
-                CellConTag.WaferNoList = FliterWaferNo(CellConTag.WaferLotID, CellConTag.WaferLotNoFromDepyo)
-
-                If My.Settings.WaferMappingUse = True Then
-                    CopyWaferMap(CellConTag.WaferLotID)
-                End If
-
-                Try
-                    m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
-                Catch ex As Exception
-                End Try
-
-                If My.Settings.SECS_Enable = False Then
-                    'LotStart
-                    CellConTag.LotStartTime = CDate(Format(Now, "yyyy/MM/dd HH:mm:ss"))
-
-                    Try
-                        m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
-                        m_EmsClient.SetActivity(My.Settings.EquipmentNo, "Running", TmeCategory.NetOperationTime)
-                    Catch ex As Exception
-                    End Try
-
-                    SaveLotStartToDbx()
-                    LotSet(My.Settings.ProcessName & "-" & My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.LotStartTime, CellConTag.OPID, CType(CellConTag.LSMode, RunModeType))
-                Else 'Secs-gem
-                    DeleteAllFolder()
-                    If My.Settings.MCType = "2100HS" OrElse My.Settings.MCType = "2009SSI" Then
-                        S2F15_SetInputQty(CUInt(CellConTag.INPUTQty))
-                        If My.Settings.AutoLoad = False Then '2100HS,2009SSI
-                            ReleaseMachine()
-                            m_frmWarningDialog("Set up เรียบร้อย กรุณากด Start ก่อน Insp.", False, 60000)
-                        Else
-                            RecipeCheck()
-                        End If
-                    ElseIf My.Settings.MCType = "Canon-D10R" Then 'Canon-D10R
-                        If My.Settings.AutoLoad = False Then
-                            _WhenInputDataAlready = True
-                            RemoteCMD_Remote()
-                        Else
-                            RecipeCheck()
-                        End If
-                    End If
-                End If
-
-                WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
-                WriteToXmlCellcon(CellconObjPath & "\" & "Recovery" & ".xml", CellConTag)  '170126 \783 CellconTag
-
-                UpdateDispaly()
-                UpdateDisplayMaterial()
-            End If
+        If My.Settings.SECS_Enable = True Then
+            SecsGemStateChecking()
         Else
-            m_frmWarningDialog(m_QRReadAlarm, False)
+            SetupLot()
         End If
+
+
+        'If My.Settings.MCType = "Canon-D10R" And My.Settings.SECS_Enable = True Then 'And lbEqState.Text = "Eq State" Then
+        '    RequestSVID_CurrentState()
+        '    Thread.Sleep(3000) 'รอสถานะ กรณีที่เปิดเครื่อแล้วมันไม่เชค สถานะ ครั้งเดียว
+        'End If
+
+        'If CellConTag.LotStartTime = Nothing AndAlso CellConTag.LotEndTime <> Nothing AndAlso CellConTag.LotID = "" Then
+        '    FinalInspCompleted()
+        'ElseIf CellConTag.LotStartTime <> Nothing AndAlso CellConTag.LotEndTime = Nothing Then
+        '    Exit Sub
+        'End If
+
+        'Dim ret As String = FirstFinalChecking(CellConTag)
+        'If ret <> "" Then
+        '    m_frmWarningDialog(ret, False)
+        '    Exit Sub
+        'End If
+
+        'If My.Settings.SECS_Enable = True AndAlso Me.BackColor = Color.Red Then 'ถ้าเป็น Secsgem จะต้องเช็คก่อนส่ง
+        '    m_frmWarningDialog("กรุณเชื่อมต่อCellCon กับ M/C ด้วยครับ", False)
+        '    Exit Sub
+        'ElseIf My.Settings.SECS_Enable = True Then
+        '    If My.Settings.MCType = "Canon-D10R" Then
+        '        If m_Equipment.EQStatusCanon <> EquipmentStateCanon.IDEL Then
+        '            m_frmWarningDialog("สถานะเครื่องจักรตอนนี้ไม่พร้อมใช้งาน กรุณาตรวจสอบ", False)
+        '            Exit Sub
+        '        End If
+        '    End If
+        'End If
+
+
+        '_WhenInputDataAlready = False
+        '_WhenPreeSetUpButton = False
+
+        'If QRWorkingSlipInputInitailCheck(True) = True Then
+        '    Dim frminput As New frmdisplayinput(Me)
+        '    frminput.lbcaption.Text = "กรุณาสแกน QR Code"
+        '    If frminput.ShowDialog = Windows.Forms.DialogResult.OK Then
+        '        Matparameter()
+        '        CellConTag = New CellConObj
+        '        CellConTag = Para
+
+        '        CellConTag.WaferLotNoFromDepyo = AllWaferLotNoFromDenpyo(CellConTag.LotID)
+        '        CellConTag.WaferLotNoListSplited = WaferLotNoSliter(CellConTag.WaferLotNoFromDepyo)
+        '        CellConTag.WaferNoList = FliterWaferNo(CellConTag.WaferLotID, CellConTag.WaferLotNoFromDepyo)
+
+        '        If My.Settings.WaferMappingUse = True Then
+        '            CopyWaferMap(CellConTag.WaferLotID)
+        '        End If
+
+        '        Try
+        '            m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
+        '        Catch ex As Exception
+        '        End Try
+
+        '        If My.Settings.SECS_Enable = False Then
+        '            'LotStart
+        '            CellConTag.LotStartTime = CDate(Format(Now, "yyyy/MM/dd HH:mm:ss"))
+
+        '            Try
+        '                m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
+        '                m_EmsClient.SetActivity(My.Settings.EquipmentNo, "Running", TmeCategory.NetOperationTime)
+        '            Catch ex As Exception
+        '            End Try
+
+        '            SaveLotStartToDbx()
+        '            LotSet(My.Settings.ProcessName & "-" & My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.LotStartTime, CellConTag.OPID, CType(CellConTag.LSMode, RunModeType))
+        '        Else 'Secs-gem
+        '            DeleteAllFolder()
+        '            If My.Settings.MCType = "2100HS" OrElse My.Settings.MCType = "2009SSI" Then
+        '                S2F15_SetInputQty(CUInt(CellConTag.INPUTQty))
+        '                If My.Settings.AutoLoad = False Then '2100HS,2009SSI
+        '                    ReleaseMachine()
+        '                    m_frmWarningDialog("Set up เรียบร้อย กรุณากด Start ก่อน Insp.", False, 60000)
+        '                Else
+        '                    RecipeCheck()
+        '                End If
+        '            ElseIf My.Settings.MCType = "Canon-D10R" Then 'Canon-D10R
+        '                If My.Settings.AutoLoad = False Then
+        '                    _WhenInputDataAlready = True
+        '                    RemoteCMD_Remote()
+        '                Else
+        '                    RecipeCheck()
+        '                End If
+        '            End If
+        '        End If
+
+        '        WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
+        '        WriteToXmlCellcon(CellconObjPath & "\" & "Recovery" & ".xml", CellConTag)  '170126 \783 CellconTag
+
+        '        UpdateDispaly()
+        '        UpdateDisplayMaterial()
+        '    End If
+        'Else
+        '    m_frmWarningDialog(m_QRReadAlarm, False)
+        'End If
 
     End Sub
 
@@ -2868,79 +2523,31 @@ EndLoop:
         Select Case CellConTag.StateCellCon
             Case CellConState.LotStart
                 CellConTag.RunTimeCount += TimeSpan.FromSeconds(1)
-                If My.Settings.Resolution = "1280x1024" Then
-                    lbRuntime1280.Text = CellConTag.RunTimeCount.ToString
-                    lbRuntime1280.BackColor = Color.Lime
-                    lbAlarmTime1280.BackColor = Color.Honeydew
-                    lbStopTime1280.BackColor = Color.Honeydew
-                ElseIf My.Settings.Resolution = "1024x768" Then
-                    lbRuntime1024.Text = CellConTag.RunTimeCount.ToString
-                    lbRuntime1024.BackColor = Color.Lime
-                    lbAlarmTime1024.BackColor = Color.Honeydew
-                    lbStopTime1024.BackColor = Color.Honeydew
-                End If
+                lbRuntime1024.Text = CellConTag.RunTimeCount.ToString
+                lbRuntime1024.BackColor = Color.Lime
+                lbAlarmTime1024.BackColor = Color.Honeydew
+                lbStopTime1024.BackColor = Color.Honeydew
+
             Case CellConState.LotAlarm
                 CellConTag.AlarmTimeCount += TimeSpan.FromSeconds(1)
-                If My.Settings.Resolution = "1280x1024" Then
-                    lbAlarmTime1280.Text = CellConTag.AlarmTimeCount.ToString
-                    lbRuntime1280.BackColor = Color.Honeydew
-                    lbAlarmTime1280.BackColor = Color.Yellow
-                    lbStopTime1280.BackColor = Color.Honeydew
-                ElseIf My.Settings.Resolution = "1024x768" Then
-                    lbAlarmTime1024.Text = CellConTag.AlarmTimeCount.ToString
-                    lbRuntime1024.BackColor = Color.Honeydew
-                    lbAlarmTime1024.BackColor = Color.Yellow
-                    lbStopTime1024.BackColor = Color.Honeydew
-                End If
+                lbAlarmTime1024.Text = CellConTag.AlarmTimeCount.ToString
+                lbRuntime1024.BackColor = Color.Honeydew
+                lbAlarmTime1024.BackColor = Color.Yellow
+                lbStopTime1024.BackColor = Color.Honeydew
+
             Case CellConState.LotStop
                 CellConTag.StopTimeCount += TimeSpan.FromSeconds(1)
-                If My.Settings.Resolution = "1280x1024" Then
-                    lbStopTime1280.Text = CellConTag.StopTimeCount.ToString
-                    lbRuntime1280.BackColor = Color.Honeydew
-                    lbAlarmTime1280.BackColor = Color.Honeydew
-                    lbStopTime1280.BackColor = Color.Red
-                ElseIf My.Settings.Resolution = "1024x768" Then
-                    lbStopTime1024.Text = CellConTag.StopTimeCount.ToString
-                    lbRuntime1024.BackColor = Color.Honeydew
-                    lbAlarmTime1024.BackColor = Color.Honeydew
-                    lbStopTime1024.BackColor = Color.Red
-                End If
+
+                lbStopTime1024.Text = CellConTag.StopTimeCount.ToString
+                lbRuntime1024.BackColor = Color.Honeydew
+                lbAlarmTime1024.BackColor = Color.Honeydew
+                lbStopTime1024.BackColor = Color.Red
+
         End Select
     End Sub
 
     Public Sub UpdateDispaly()
         CellConTag.Process = My.Settings.ProcessName
-        lbMcNo.Text = My.Settings.ProcessName & "-" & My.Settings.EquipmentNo
-
-        '1284x1024
-        lbLotNo.Text = CellConTag.LotID
-        lbPackage.Text = CellConTag.Package
-        lbDevice.Text = CellConTag.DeviceName
-        lbRecipe.Text = CellConTag.Recipe
-        lbOPID.Text = CellConTag.OPID
-        lbInputTotal.Text = CellConTag.INPUTQty.ToString
-        lbWaferLotNo.Text = CellConTag.WaferLotID
-        lbGoodTotal.Text = CellConTag.TotalGoodPcs
-        lbNGTotal.Text = CellConTag.TotalNGPcs
-        lbLotInfoTDC.Text = CellConTag.LRReply
-        If CellConTag.LotStartTime <> Nothing Then
-            lbStartTime.Text = Format(CellConTag.LotStartTime, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbStartTime.Text = ""
-        End If
-
-        If CellConTag.LotEndTime <> Nothing Then
-            lbEndTime.Text = Format(CellConTag.LotEndTime, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbEndTime.Text = ""
-        End If
-
-        If CellConTag.LotStartTime <> Nothing AndAlso CellConTag.LotEndTime <> Nothing AndAlso CellConTag.OPCheck <> Nothing Then
-            lbInputTotal.Text = CStr(CellConTag.InputAdjust)
-            lbGoodTotal.Text = CStr(CellConTag.GoodAdjust)
-            lbNGTotal.Text = CStr(CellConTag.NGAdjust)
-        End If
-
 
 
         '1024x768
@@ -2970,10 +2577,8 @@ EndLoop:
 
         If CellConTag.Torinokoshi = True Then
             lbtorino.Visible = True
-            lbtorino1284.Visible = True
         Else
             lbtorino.Visible = False
-            lbtorino1284.Visible = False
         End If
 
         If CellConTag.LotStartTime <> Nothing AndAlso CellConTag.LotEndTime <> Nothing AndAlso CellConTag.OPCheck <> Nothing Then
@@ -2982,51 +2587,31 @@ EndLoop:
             lbNg1024.Text = CStr(CellConTag.NGAdjust)
         End If
 
-        If My.Settings.Resolution = "1024x768" Then
-            'Major Alarm
-            lbalmPreform1024.Text = CellConTag.AlarmPreform.ToString
-            lbalmBonder1024.Text = CellConTag.AlarmBonder.ToString
-            lbalmFrameOut1024.Text = CellConTag.AlarmFrameOut.ToString
-            lbalmPickup1024.Text = CellConTag.AlarmPickup.ToString
-            lbalmBridge1024.Text = CellConTag.AlarmBridgeInsp.ToString
-            lbalmPreformInsp1024.Text = CellConTag.AlarmPreformInsp.ToString
-            lbAlmTotal1024.Text = CellConTag.TotalAlarm.ToString
 
-            'Production time
-            lbRuntime1024.Text = CellConTag.RunTimeCount.ToString
-            lbStopTime1024.Text = CellConTag.StopTimeCount.ToString
-            lbAlarmTime1024.Text = CellConTag.AlarmTimeCount.ToString
-            lbWaferNo1024.Text = CellConTag.CurrentWaferID
-        ElseIf My.Settings.Resolution = "1280x1024" Then
-            lbalmPreform1280.Text = CellConTag.AlarmPreform.ToString
-            lbalmBonder1280.Text = CellConTag.AlarmBonder.ToString
-            lbalmFrameOut1280.Text = CellConTag.AlarmFrameOut.ToString
-            lbalmPickup1280.Text = CellConTag.AlarmPickup.ToString
-            lbalmBridge1280.Text = CellConTag.AlarmBridgeInsp.ToString
-            lbalmPreformInsp1280.Text = CellConTag.AlarmPreformInsp.ToString
-            lbAlmTotal1280.Text = CellConTag.TotalAlarm.ToString
+        'Major Alarm
+        lbalmPreform1024.Text = CellConTag.AlarmPreform.ToString
+        lbalmBonder1024.Text = CellConTag.AlarmBonder.ToString
+        lbalmFrameOut1024.Text = CellConTag.AlarmFrameOut.ToString
+        lbalmPickup1024.Text = CellConTag.AlarmPickup.ToString
+        lbalmBridge1024.Text = CellConTag.AlarmBridgeInsp.ToString
+        lbalmPreformInsp1024.Text = CellConTag.AlarmPreformInsp.ToString
+        lbAlmTotal1024.Text = CellConTag.TotalAlarm.ToString
 
-            lbRuntime1280.Text = CellConTag.RunTimeCount.ToString
-            lbStopTime1280.Text = CellConTag.StopTimeCount.ToString
-            lbAlarmTime1280.Text = CellConTag.AlarmTimeCount.ToString
-            lbWaferNo.Text = CellConTag.CurrentWaferID
-        End If
+        'Production time
+        lbRuntime1024.Text = CellConTag.RunTimeCount.ToString
+        lbStopTime1024.Text = CellConTag.StopTimeCount.ToString
+        lbAlarmTime1024.Text = CellConTag.AlarmTimeCount.ToString
+        lbWaferNo1024.Text = CellConTag.CurrentWaferID
+
+
 
         If (CellConTag.StateCellCon = CellConState.LotEnd Or CellConTag.StateCellCon = CellConState.LotClear) Then
             lbRuntime1024.BackColor = Color.Honeydew
             lbAlarmTime1024.BackColor = Color.Honeydew
             lbStopTime1024.BackColor = Color.Honeydew
-
-            lbRuntime1280.BackColor = Color.Honeydew
-            lbAlarmTime1280.BackColor = Color.Honeydew
-            lbStopTime1280.BackColor = Color.Honeydew
         End If
 
         lbRubberCollet.Text = CellConTag.RubberColletID
-
-
-
-
 
         SqlDependencyFunction(CellConTag.LotID)
 
@@ -3165,55 +2750,12 @@ EndLoop:
 
 
     Private Sub UpdateDisplayMaterial()
-        '1284x1024
-        lbFrameQR1.Text = CellConTag.FrameSeqNo_1st
-        lbFrameLotNo1.Text = CellConTag.FrameLotNo_1st
-        lbFrameType1.Text = CellConTag.FrameType_1st
-
-
-        lbPreformLotNo1.Text = CellConTag.PreformLotNo_1st
-        If CellConTag.PreforInputDate_1st <> Nothing Then
-            lbPreformInputDate1.Text = Format(CellConTag.PreforInputDate_1st, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbPreformInputDate1.Text = ""
-        End If
-        If CellConTag.PreforExpireDate_1st <> Nothing Then
-            lbPreformLife1.Text = Format(CellConTag.PreforExpireDate_1st, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbPreformLife1.Text = ""
-        End If
-        If CellConTag.PreforExpireDate_1st <> Nothing Then
-            OprData.PreformExpDate1 = CDate(CellConTag.PreforExpireDate_1st)
-        Else
-            OprData.PreformExpDate1 = Nothing
-        End If
-        lbPreformQR1.Text = CellConTag.PreformQR_1st
-        lbPreformType1.Text = CellConTag.PreformType_1st
-
-
-        lbFrameQR2.Text = CellConTag.FrameSeqNo_2nd
-        lbFrameLotNo2.Text = CellConTag.FrameLotNo_2nd
-        lbFrameType2.Text = CellConTag.FrameType_2nd
-        lbPreformLotNo2.Text = CellConTag.PreformLotNo_2nd
-
-        If CellConTag.PreforInputDate_2nd <> Nothing Then
-            lbPreformInputDate2.Text = Format(CellConTag.PreforInputDate_2nd, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbPreformInputDate2.Text = ("")
-        End If
-        If CellConTag.PreforExpireDate_2nd <> Nothing Then
-            lbPreformLife2.Text = Format(CellConTag.PreforExpireDate_2nd, "yyyy/MM/dd HH:mm:ss")
-        Else
-            lbPreformLife2.Text = ""
-        End If
 
         If CellConTag.PreforExpireDate_2nd <> Nothing Then
             OprData.PreformExpDate2 = CDate(CellConTag.PreforExpireDate_2nd)
         Else
             OprData.PreformExpDate2 = Nothing
         End If
-        lbPreformQR2.Text = CellConTag.PreformQR_2nd
-        lbPreformType2.Text = CellConTag.PreformType_2nd
 
         '1024x768
         lbQRFrame1_1024.Text = CellConTag.FrameSeqNo_1st
@@ -3273,18 +2815,14 @@ EndLoop:
         'Tabcontrol Select a current material
         'Frame
         If CellConTag.FrameSeqNo_2nd <> Nothing Then
-            tabFrame1280.SelectedIndex = 1
             tabFrame1024.SelectedIndex = 1
         Else
-            tabFrame1280.SelectedIndex = 0
             tabFrame1024.SelectedIndex = 0
         End If
 
         If CellConTag.PreformQR_2nd <> Nothing Then
-            tabPreform1280.SelectedIndex = 1
             tabPreform1024.SelectedIndex = 1
         Else
-            tabPreform1280.SelectedIndex = 0
             tabPreform1024.SelectedIndex = 0
         End If
 
@@ -3399,7 +2937,6 @@ EndLoop:
                             If DataGridView2.Item(1, i).Value IsNot DBNull.Value Then
                                 If CStr(DataGridView2.Item(1, i).Value) <> "" Then 'FinalQC
 
-                                    picFirst.Visible = False
                                     picFirst1024.Visible = False
                                     FinalInspCompleted()
 
@@ -3409,7 +2946,6 @@ EndLoop:
                             ElseIf DataGridView2.Item(0, i).Value IsNot DBNull.Value Then
                                 If CStr(DataGridView2.Item(0, i).Value) <> "" Then 'FirstQC
 
-                                    picFirst.Visible = True
                                     picFirst1024.Visible = True
 
                                     If (CellConTag.LotStartTime = CDate(DataGridView2.Item(2, i).Value) And CellConTag.LotEndTime <> Nothing) And DataGridView2.Item(3, i).Value Is DBNull.Value And CellConTag.OPCheck <> Nothing Then
@@ -3498,10 +3034,8 @@ EndLoop:
 
         If CellConTag.Torinokoshi = True Then
             lbtorino.Visible = True
-            lbtorino1284.Visible = True
         Else
             lbtorino.Visible = False
-            lbtorino1284.Visible = False
         End If
 
         If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing Then
@@ -3514,15 +3048,13 @@ EndLoop:
             Dim dirfolderMap As String() = Directory.GetDirectories(WaferMapDir)
             If dirFiles.Count <> 0 Then
                 pic1024x768.Image = My.Resources.T
-                pic1284x1084.Image = My.Resources.T
                 lbCheckState.Text = "OK"
             ElseIf dirfolderMap.Count <> 0 AndAlso My.Settings.MCType = "IDBW" Then
                 pic1024x768.Image = My.Resources.T
-                pic1284x1084.Image = My.Resources.T
+
                 lbCheckState.Text = "OK"
             Else
-                pic1024x768.Image = My.Resources.F
-                pic1284x1084.Image = My.Resources.F
+
                 lbCheckState.Text = "NG"
             End If
         End If
@@ -3626,7 +3158,7 @@ EndLoop:
 
     End Sub
 
-    Private Sub btnFrameQR_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btPreform1024.Click, btnPreformQR.Click
+    Private Sub btnFrameQR_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btPreform1024.Click
 
         Dim frmMat As New frmInputMaterial
         frmMat.lbCaption.Text = "Scan Preform QR Code"
@@ -3669,7 +3201,7 @@ EndLoop:
         End If
     End Sub
 
-    Private Sub btnPreformQR_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btFrame1024.Click, btnFrameQR.Click
+    Private Sub btnPreformQR_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btFrame1024.Click
 
         If CellConTag.LotStartTime = Nothing AndAlso CellConTag.LotEndTime <> Nothing AndAlso CellConTag.LotID = "" Then
             FinalInspCompleted()
@@ -3965,7 +3497,7 @@ EndLoop:
         Catch ex As Exception
         End Try
 
-        If picFirst.Visible = True Or picFirst1024.Visible = True Then
+        If picFirst1024.Visible = True Then
             If ConfirmLotEnd() = False Then
                 Exit Sub
             End If
@@ -3974,12 +3506,9 @@ EndLoop:
             m_frmWarningDialog("กรุณาทำ Final Insp.", False, 30000)
         Else
             NotConfirmFirstAndFinal()
-
             CellConTag.StateCellCon = CellConState.LotEnd
             m_frmWarningDialog("Lot End เรียบร้อยแล้ว ยังไม่ทำ First Insp. " & vbCrLf & "กรุณาทำ First Insp. ด้วยครับ ", False, 30000)
         End If
-
-
 
         Try
             m_EmsClient.SetOutput(My.Settings.EquipmentNo, CellConTag.GoodAdjust, CellConTag.NGAdjust)
@@ -4002,21 +3531,12 @@ EndLoop:
 
         DBxDataSet.DBData.Rows.Clear()
         DbDataTableAdapter1.FillBy(DBxDataSet.DBData, CellConTag.LotID, CellConTag.LotStartTime)
-
         For Each strDataRow As DBxDataSet.DBDataRow In DBxDataSet.DBData.Rows
             If strDataRow.LotNo = CellConTag.LotID AndAlso strDataRow.LotStartTime = CellConTag.LotStartTime Then
                 If strDataRow.IsQCFirstLotModeNull = True And strDataRow.IsQCFinishLotModeNull = True Then 'กรณีไม่ได้ทำ First แล้ว LotEnd
                     If NotConfirmFirstAndFinal() = True Then
                         CellConTag.StateCellCon = CellConState.LotEnd
                         m_frmWarningDialog("Lot End เรียบร้อยแล้ว ยังไม่ทำ First Insp. " & vbCrLf & "กรุณาทำ First Insp. ด้วยครับ ", False, 30000)
-                        If My.Settings.MCType = "IDBW" Then
-                            Try
-                                m_EmsClient.SetOutput(My.Settings.EquipmentNo, CellConTag.GoodAdjust, CellConTag.NGAdjust)
-                                m_EmsClient.SetLotEnd(My.Settings.EquipmentNo)
-                                m_EmsClient.SetActivity(My.Settings.EquipmentNo, "Stop", TmeCategory.StopLoss)
-                            Catch ex As Exception
-                            End Try
-                        End If
                     Else
                         If My.Settings.MCType <> "Canon-D10R" Then
                             CellConTag.StateCellCon = CellConState.LotEnd
@@ -4029,14 +3549,6 @@ EndLoop:
                     If ConfirmLotEnd() = True Then
                         CellConTag.StateCellCon = CellConState.LotEnd
                         m_frmWarningDialog("กรุณาทำ Final Insp.", False)
-                        If My.Settings.MCType = "IDBW" Then
-                            Try
-                                m_EmsClient.SetOutput(My.Settings.EquipmentNo, CellConTag.GoodAdjust, CellConTag.NGAdjust)
-                                m_EmsClient.SetLotEnd(My.Settings.EquipmentNo)
-                                m_EmsClient.SetActivity(My.Settings.EquipmentNo, "Stop", TmeCategory.StopLoss)
-                            Catch ex As Exception
-                            End Try
-                        End If
                     Else
                         If My.Settings.MCType = "Canon-D10R" OrElse My.Settings.MCType = "IDBW" Then
                             CellConTag.LotEndTime = Nothing
@@ -4046,9 +3558,6 @@ EndLoop:
             End If
         Next
 
-
-
-
         SaveAlarmInfoToDBx()
         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
         UpdateDispaly()
@@ -4056,7 +3565,7 @@ EndLoop:
     End Sub
 
 
-    Private Sub Button11_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btSet1024.Click, btSet1284.Click
+    Private Sub Button11_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btSet1024.Click
 
 
         If My.Settings.SECS_Enable = True AndAlso Me.BackColor = Color.Red Then 'ถ้าเป็น Secsgem จะต้องเช็คก่อนส่ง
@@ -4344,7 +3853,7 @@ EndLoop:
         If countFiles.Count = 0 Then
             Dim Zero As New S12Deny(4)
             MDIParent1.Host.Reply(request, Zero)
-            m_frmWarningDialog("ไม่มีไฟล์ Wafer LotNo :" & lbWaferLotNo.Text & vbCrLf & "ในระบบ \\zion\WaferMapping กรุณาตรวจสอบหรือติดต่อผู้ที่เกี่ยวข้่อง", False)
+            m_frmWarningDialog("ไม่มีไฟล์ Wafer LotNo :" & CellConTag.WaferLotID & vbCrLf & "ในระบบ \\zion\WaferMapping กรุณาตรวจสอบหรือติดต่อผู้ที่เกี่ยวข้่อง", False)
             Exit Sub
         End If
 
@@ -4454,7 +3963,7 @@ EndLoop:
         If countFiles.Count = 0 Then
             Dim Zero As New S12Deny(4)
             MDIParent1.Host.Reply(request, Zero)
-            m_frmWarningDialog("ไม่มีไฟล์ Wafer LotNo :" & lbWaferLotNo.Text & vbCrLf & "ในระบบ \\zion\WaferMapping กรุณาตรวจสอบหรือติดต่อผู้ที่เกี่ยวข้่อง", False)
+            'm_frmWarningDialog("ไม่มีไฟล์ Wafer LotNo :" & lbWaferLotNo.Text & vbCrLf & "ในระบบ \\zion\WaferMapping กรุณาตรวจสอบหรือติดต่อผู้ที่เกี่ยวข้่อง", False)
             Exit Sub
         End If
 
@@ -4913,6 +4422,10 @@ EndLoop:
 
     Function WaferLotNoSliter(ByVal GetWaferLotFromDenpyo As List(Of String)) As List(Of String)
 
+        If GetWaferLotFromDenpyo Is Nothing Then
+            Return Nothing
+        End If
+
         Dim ret As New List(Of String)
         If GetWaferLotFromDenpyo.Count = 0 Then
             Return Nothing
@@ -4930,6 +4443,9 @@ EndLoop:
     End Function
 
     Function FliterWaferNo(ByVal SelectWaferLotno As String, ByVal waferlistdenpyo As List(Of String)) As List(Of String)
+        If waferlistdenpyo Is Nothing Then
+            Return Nothing
+        End If
 
         Dim ret As New List(Of String)
         If waferlistdenpyo.Count = 0 Then
@@ -4962,7 +4478,7 @@ EndLoop:
 
     End Function
 
-    Private Sub lbwaferLotNo1024_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lbwaferLotNo1024.Click, lbWaferLotNo.Click
+    Private Sub lbwaferLotNo1024_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lbwaferLotNo1024.Click
         If My.Settings.WaferMappingUse = False Then
             Exit Sub
         End If
@@ -5441,7 +4957,6 @@ EndLoop:
                     If CellConTag.LotStartTime <> Nothing And CellConTag.LotEndTime = Nothing And CellConTag.LotID <> Nothing Then
                         Dim GoodDies As Integer = CInt(CLng("&H" & SplitData(1)))
                         CellConTag.TotalGood = GoodDies
-                        lbGoodTotal.Text = CStr(GoodDies)
                         lbGood1024.Text = CStr(GoodDies)
                         CellConTag.StateCellCon = CellConState.LotStart
                         Try
@@ -5569,7 +5084,6 @@ EndLoop:
         End Select
 
         lbAlmTotal1024.Text = CellConTag.TotalAlarm.ToString
-        lbAlmTotal1280.Text = CellConTag.TotalAlarm.ToString
         SaveAlarmInfoTable()
         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)
     End Sub
@@ -5660,6 +5174,7 @@ PreformStateOK:
         Return Mat
 
     End Function
+
     Function FrameCheck(ByVal seq As String) As MaterialClass
         Dim mat As New MaterialClass
         If seq.Length <> 12 OrElse IsNumeric(seq) = False Then
@@ -5675,9 +5190,7 @@ PreformStateOK:
         FrameMatAdapter.FrameMaterail_IS(FrameMat, seq)
 
         If FrameMat.Rows.Count = 0 Then
-            Dim frm As New frmWarning
-            frm.WarningTimeout("QR Frame(" & seq & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input")
-            frm.ShowDialog()
+            m_frmWarningDialog("QR Frame(" & seq & ") นี้ยังไม่ถูกบันทึกลงในฐานข้อมูลของ Frame Material ติดต่อห้อง Frame Material หรือ Manual Input", True)
 
             Dim frmFrameMan As New frmFrameInputManual
             If frmFrameMan.ShowDialog = Windows.Forms.DialogResult.OK Then
@@ -6154,7 +5667,6 @@ PreformStateOK:
         CellConTag.CurrentLotNo = CellConTag.LotID
 
         'Display WaferID after MapDownload
-        lbWaferNo.Text = CellConTag.CurrentWaferID
         lbwaferLotNo1024.Text = CellConTag.CurrentWaferID
 
         WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
@@ -6201,77 +5713,127 @@ PreformStateOK:
         Dim aaaa As New frmFinalInspection(Me)
         aaaa.ShowDialog()
     End Sub
+
+    Private Sub ProcessForm_Resize(sender As Object, e As EventArgs) Handles Me.Resize
+        c_Resize.ResizeAllControls(Me)
+    End Sub
+
+
+    Function FirstFinalChecking(CellCon As CellConObj) As String
+        If CellCon.LotID <> "" AndAlso CellCon.LotStartTime <> Nothing Then  'กรอง QCMode  First A และ final Null 
+            Dim QCTable As New DBxDataSet.QCTableDataTable
+            Dim qcap As New DBxDataSetTableAdapters.QCTableTableAdapter
+            QCTable = qcap.GetData(CellCon.LotID, CellCon.LotStartTime)
+            For Each strdatarow As DBxDataSet.QCTableRow In QCTable.Rows
+                If strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellCon.LotEndTime = Nothing Then
+                    Return "กรุณา End Lot ก่อน"
+                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellCon.LotEndTime <> Nothing And strdatarow.IsLotEndTimeNull = False Then
+                    Return "กรุณาทำ Final Insp."
+                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = True And CellCon.LotEndTime <> Nothing Then
+                    'm_frmWarningDialog("กรุณากดปุ่ม End เพื่อยืนยันจำนวนงาน , Alarm ด้วยครับ", False)
+                    Return "กรุณากดปุ่ม End เพื่อยืนยันจำนวนงาน , Alarm ด้วยครับ"
+                ElseIf strdatarow.IsQCFirstLotModeNull = False And strdatarow.IsQCFinishLotModeNull = False Then
+                    FinalInspCompleted()
+                    WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellCon)  '170126 \783 CellCon
+                ElseIf strdatarow.IsQCFirstLotModeNull = True And strdatarow.IsQCFinishLotModeNull = True Then
+                    Return "กรุณาทำ First Insp."
+                End If
+            Next
+        End If
+        Return ""
+    End Function
+    Private Sub SetupLot()
+
+        Dim ret As String = FirstFinalChecking(CellConTag)
+        If ret <> "" Then
+            m_frmWarningDialog(ret, False)
+            Exit Sub
+        End If
+
+        If QRWorkingSlipInputInitailCheck(True) = True Then
+            Dim frminput As New frmdisplayinput(Me)
+            frminput.lbcaption.Text = "กรุณาสแกน QR Code"
+            If frminput.ShowDialog = Windows.Forms.DialogResult.OK Then
+                Matparameter()
+                CellConTag = New CellConObj
+                CellConTag = Para
+
+                CellConTag.WaferLotNoFromDepyo = AllWaferLotNoFromDenpyo(CellConTag.LotID)
+                CellConTag.WaferLotNoListSplited = WaferLotNoSliter(CellConTag.WaferLotNoFromDepyo)
+                CellConTag.WaferNoList = FliterWaferNo(CellConTag.WaferLotID, CellConTag.WaferLotNoFromDepyo)
+
+                If My.Settings.WaferMappingUse = True Then
+                    CopyWaferMap(CellConTag.WaferLotID)
+                End If
+
+                Try
+                    m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
+                Catch ex As Exception
+                End Try
+
+
+                If My.Settings.SECS_Enable = False Then
+                    'LotStart
+                    CellConTag.LotStartTime = CDate(Format(Now, "yyyy/MM/dd HH:mm:ss"))
+
+                    Try
+                        m_EmsClient.SetCurrentLot(My.Settings.EquipmentNo, CellConTag.LotID, 0)
+                        m_EmsClient.SetActivity(My.Settings.EquipmentNo, "Running", TmeCategory.NetOperationTime)
+                    Catch ex As Exception
+                    End Try
+
+                    SaveLotStartToDbx()
+                    LotSet(My.Settings.ProcessName & "-" & My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.LotStartTime, CellConTag.OPID, CType(CellConTag.LSMode, RunModeType))
+                Else 'Secs-gem
+                    DeleteAllFolder()
+                    If My.Settings.MCType = "2100HS" OrElse My.Settings.MCType = "2009SSI" Then
+                        S2F15_SetInputQty(CUInt(CellConTag.INPUTQty))
+                        If My.Settings.AutoLoad = False Then '2100HS,2009SSI
+                            ReleaseMachine()
+                            m_frmWarningDialog("Set up เรียบร้อย กรุณากด Start ก่อน Insp.", False, 60000)
+                        Else
+                            RecipeCheck()
+                        End If
+                    ElseIf My.Settings.MCType = "Canon-D10R" Then 'Canon-D10R
+                        If My.Settings.AutoLoad = False Then
+                            _WhenInputDataAlready = True
+                            RemoteCMD_Remote()
+                        Else
+                            RecipeCheck()
+                        End If
+                    End If
+                End If
+
+                WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag
+                WriteToXmlCellcon(CellconObjPath & "\" & "Recovery" & ".xml", CellConTag)  '170126 \783 CellconTag
+
+                UpdateDispaly()
+                UpdateDisplayMaterial()
+            End If
+        Else
+            m_frmWarningDialog(m_QRReadAlarm, False)
+        End If
+    End Sub
+    Private Sub SecsGemStateChecking()
+
+        If My.Settings.SECS_Enable = True AndAlso Me.BackColor = Color.Red Then 'ถ้าเป็น Secsgem จะต้องเช็คก่อนส่ง
+            m_frmWarningDialog("กรุณเชื่อมต่อCellCon กับ M/C ด้วยครับ", False)
+            Exit Sub
+        ElseIf My.Settings.SECS_Enable = True Then
+            If My.Settings.MCType = "Canon-D10R" Then
+                If m_Equipment.EQStatusCanon <> EquipmentStateCanon.IDEL Then
+                    m_frmWarningDialog("สถานะเครื่องจักรตอนนี้ไม่พร้อมใช้งาน กรุณาตรวจสอบ", False)
+                    Exit Sub
+                End If
+            End If
+        End If
+
+        _WhenInputDataAlready = False
+        _WhenPreeSetUpButton = False
+        c_LotSetUp = True
+        RequestSVID_CurrentState()
+    End Sub
+    Private Sub LotSetupSecsGem()
+        SetupLot()
+    End Sub
 End Class
-
-
-'Private Sub SaveUploadParameterxml(ByVal MapPara As MapUploadParameter)
-'    Dim DirPathMapUpload As String
-'    Dim tmpWaferLotNo As String
-'    If CellConTag.WaferLotID = Nothing Then
-'        If MapPara.MID <> CellConTag.CurrentWaferID Then
-'            Exit Sub
-'        End If
-'        DirPathMapUpload = My.Application.Info.DirectoryPath & "\WaferMapping\_Backup\" & CellConTag.CurrentWaferLotID
-'        tmpWaferLotNo = CellConTag.CurrentWaferLotID
-'    Else
-'        DirPathMapUpload = My.Application.Info.DirectoryPath & "\WaferMapping\_Backup\" & CellConTag.WaferLotID
-'        tmpWaferLotNo = CellConTag.WaferLotID
-'    End If
-
-'    If Directory.Exists(DirPathMapUpload) = False Then
-'        Directory.CreateDirectory(DirPathMapUpload)
-'    End If
-
-'    Dim PreWord As String
-'    If MapPara.MID.Length = 7 Then
-'        PreWord = MapPara.MID.Substring(0, 4)
-'    Else
-'        Exit Sub
-'    End If
-
-'    If tmpWaferLotNo.Contains(PreWord) = False Then
-'        Exit Sub
-'    End If
-
-'    MapPara.LotNo = CellConTag.LotID
-'    MapPara.Pacakge = CellConTag.Package
-'    MapPara.RecipeName = CellConTag.Recipe
-
-'    If CellConTag.WaferLotID <> "" Then
-'        MapPara.WaferLotNo = CellConTag.WaferLotID
-'    Else
-'        MapPara.WaferLotNo = CellConTag.CurrentWaferLotID
-'    End If
-
-
-
-'    If CellConTag.LotStartTime <> Nothing Then
-'        MapPara.LotStartTime = CellConTag.LotStartTime
-'    End If
-
-'    MapPara.UploadTime = Now
-'    'Dim xfile As String = DirPathMapUpload & "\" & CellConTag.LotID & "_" & MapPara.MID & "_" & Format(Now, "yyyyMMddHHmmss") & ".xml"
-'    Dim xfile As String = DirPathMapUpload & "\" & MapPara.MID & ".xml"
-'    Dim XmlFile As FileStream = New FileStream(xfile, FileMode.Create)
-'    Dim serialize As XmlSerializer = New XmlSerializer(m_MapUpload.GetType)
-'    serialize.Serialize(XmlFile, m_MapUpload)
-'    XmlFile.Close()
-
-'End Sub
-
-'Function LoadUploadParameterxml(ByVal MID As String, ByVal CellconWaferLotNo As String) As Boolean
-'    Dim DirPathMapUpload As String = My.Application.Info.DirectoryPath & "\WaferMapping\_Backup\" & CellconWaferLotNo
-'    Dim xfile As String = DirPathMapUpload & "\" & MID & ".xml"
-
-'    If File.Exists(xfile) = False Then
-'        Return False
-'    End If
-
-'    Using XmlFile As FileStream = New FileStream(xfile, FileMode.Open)
-'        Dim serialize As XmlSerializer = New XmlSerializer(GetType(MapUploadParameter))
-'        m_MapUpload = CType(serialize.Deserialize(XmlFile), MapUploadParameter)
-'        XmlFile.Close()
-'    End Using
-
-'    Return True
-'End Function

@@ -18,10 +18,14 @@ Public Class frmInputJig
 
         If e.KeyChar = Chr(13) Then
             If tbRevQr.Text.Length <> 9 Then
-                ShowWarning("QrCode is invalid.  Please try again ")
+                m_frmWarningDialog("QrCode is invalid.  Please try again ", True)
+                tbRevQr.Text = ""
+                tbRevQr.Focus()
                 Exit Sub
             ElseIf Not tbRevQr.Text.Contains("JIG") Then
-                ShowWarning("QrCode is invalid.  Please try again ")
+                m_frmWarningDialog("QrCode is invalid.  Please try again ", True)
+                tbRevQr.Text = ""
+                tbRevQr.Focus()
                 Exit Sub
             End If
 
@@ -29,6 +33,8 @@ Public Class frmInputJig
                 Para.RubberColletID = c_ItemCode
                 Me.DialogResult = Windows.Forms.DialogResult.OK
             Else
+                tbRevQr.Text = ""
+                tbRevQr.Focus()
                 Exit Sub
             End If
 
@@ -36,15 +42,6 @@ Public Class frmInputJig
         End If
     End Sub
 
-    Private Sub ShowWarning(ByVal message As String)
-        ProgressBar1.Value = 0
-        tbRevQr.Text = ""
-
-        Dim frm As New frmWarning
-        frm.BackColor = Color.Yellow
-        frm.lbwarningMes.Text = message
-        frm.ShowDialog()
-    End Sub
 
     Function CheckCollet(ByVal lotNo As String, ByVal qrCode As String, ByVal mcNo As String, ByVal mcType As String, ByVal opNo As String) As Boolean
         Dim colletService As JIGServiceSoapClient = New JIGServiceSoapClient
@@ -54,7 +51,7 @@ Public Class frmInputJig
             c_ItemCode = ResultClass.ItemCode
             Return True
         Else
-            ShowWarning(ResultClass.ErrorMessage)
+            m_frmWarningDialog(ResultClass.ErrorMessage, False)
             Return False
         End If
     End Function

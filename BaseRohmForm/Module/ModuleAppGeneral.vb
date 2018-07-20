@@ -30,7 +30,6 @@ Module ModuleAppGeneral
     Public m_warningDisplay As frmWarning
 
 
-
     Enum CellConState
         LotStart = 1
         LotEnd = 2

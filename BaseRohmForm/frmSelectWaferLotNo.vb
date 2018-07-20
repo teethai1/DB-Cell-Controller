@@ -8,10 +8,8 @@
     End Sub
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
-        Dim frmWarning As New frmWarning
         If cbWaferLotNo.Text = "" Then
-            frmWarning.WarningTimeout("กรุณาเลือก Wafer LotNo", 30000)
-            frmWarning.ShowDialog()
+            m_frmWarningDialog("กรุณาเลือก Wafer LotNo", True, 30000)
             Exit Sub
             'ElseIf cbWaferLotNo.Text = m_currentwafer Then
             '    frmWarning.WarningTimeout("Wafer LotNo นี้ใช้งานอยู่แล้ว กรุณาเลือก Wafer LotNo ใหม่", 30000)
