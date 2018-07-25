@@ -21,7 +21,8 @@ Public Class frmFinalInspection
             End If
 
             c_EndMode = EndModeType.AbnormalEndAccumulate
-
+            Abnormal()
+            Exit Sub
         End If
 
         If IsNumeric(tbAlmBonder.Text) = False OrElse IsNumeric(tbAlmBridgeInsp.Text) = False OrElse IsNumeric(tbAlmFrameOut.Text) = False OrElse IsNumeric(tbAlmPickup.Text) = False OrElse IsNumeric(tbAlmPreform.Text) = False OrElse IsNumeric(tbAlmPreformInsp.Text) = False Then
@@ -48,6 +49,7 @@ Public Class frmFinalInspection
                 Exit Sub
             End If
         Else
+
             Dim frmQR As New frmdisplayinput(Nothing)
             frmQR.lbcaption.Text = "กรุณาสแกน Operator Number"
             frmQR.tbOPCheck.Visible = True
@@ -61,10 +63,22 @@ Public Class frmFinalInspection
             End If
         End If
 
-
-
     End Sub
 
+    Private Sub Abnormal()
+        Dim frmQR As New frmdisplayinput(Nothing)
+        frmQR.lbcaption.Text = "กรุณาสแกน Operator Number"
+        frmQR.tbOPCheck.Visible = True
+        frmQR.tbOP.Visible = False
+        frmQR.tbQR.Visible = False
+        frmQR.Panel1.Visible = False
+        If frmQR.ShowDialog = Windows.Forms.DialogResult.OK Then
+            Me.DialogResult = Windows.Forms.DialogResult.Cancel
+            Exit Sub
+        Else
+            Exit Sub 
+        End If
+    End Sub
 
 
     Private Sub frmFinalInspection_FormClosed(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosedEventArgs) Handles Me.FormClosed
@@ -90,7 +104,8 @@ Public Class frmFinalInspection
             tbAlmPreformInsp.Text = CStr(CellConTag.AlarmPreformInsp)
         End If
         If My.Settings.MCType = "Canon-D10R" Then
-            gbRelease.Visible = True
+            'gbRelease.Visible = True
+            gbRelease.Visible = False
         Else
             gbRelease.Visible = False
         End If

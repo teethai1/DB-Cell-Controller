@@ -1964,25 +1964,25 @@ EndLoop:
     End Function
 
 
-    Private Sub MaterialDefaultColor()
-        'lbFrameQR1.BackColor = Color.LightCyan
-        'lbFrameQR2.BackColor = Color.LightGreen
-        'lbFrameLotNo1.BackColor = Color.LightCyan
-        'lbFrameLotNo2.BackColor = Color.LightGreen
-        'lbFrameType1.BackColor = Color.LightCyan
-        'lbFrameType2.BackColor = Color.LightGreen
-        'lbPreformQR1.BackColor = Color.LightCyan
-        'lbPreformQR2.BackColor = Color.LightGreen
-        'lbPreformType1.BackColor = Color.LightCyan
-        'lbPreformType2.BackColor = Color.LightGreen
-        'lbPreformLife1.BackColor = Color.LightCyan
-        'lbPreformLife2.BackColor = Color.LightGreen
-        'lbPreformLotNo1.BackColor = Color.LightCyan
-        'lbPreformLotNo2.BackColor = Color.LightGreen
-        'lbPreformLife1.ForeColor = Color.Black
-        'lbPreformLife2.ForeColor = Color.Black
+    'Private Sub MaterialDefaultColor()
+    '    lbFrameQR1.BackColor = Color.LightCyan
+    '    lbFrameQR2.BackColor = Color.LightGreen
+    '    lbFrameLotNo1.BackColor = Color.LightCyan
+    '    lbFrameLotNo2.BackColor = Color.LightGreen
+    '    lbFrameType1.BackColor = Color.LightCyan
+    '    lbFrameType2.BackColor = Color.LightGreen
+    '    lbPreformQR1.BackColor = Color.LightCyan
+    '    lbPreformQR2.BackColor = Color.LightGreen
+    '    lbPreformType1.BackColor = Color.LightCyan
+    '    lbPreformType2.BackColor = Color.LightGreen
+    '    lbPreformLife1.BackColor = Color.LightCyan
+    '    lbPreformLife2.BackColor = Color.LightGreen
+    '    lbPreformLotNo1.BackColor = Color.LightCyan
+    '    lbPreformLotNo2.BackColor = Color.LightGreen
+    '    lbPreformLife1.ForeColor = Color.Black
+    '    lbPreformLife2.ForeColor = Color.Black
 
-    End Sub
+    'End Sub
     Public Function QRWorkingSlipInputInitailCheck(ByVal BeAfRead As Boolean, Optional ByVal WorkSlipQR As WorkingSlipQRCode = Nothing) As Boolean   'Before Read = True, After Read =False
 
 
@@ -2016,7 +2016,8 @@ EndLoop:
                 CellConTag.PreformType_2nd = ""
                 CellConTag.PreformQR_1st = ""
                 CellConTag.PreformQR_2nd = ""
-                MaterialDefaultColor()
+                lbPreformExp1_1024.BackColor = Color.LightCyan
+                'MaterialDefaultColor()
                 UpdateDisplayMaterial()
                 Return False
             End If
@@ -2039,7 +2040,7 @@ EndLoop:
 
                 WriteToXmlCellcon(CellconObjPath & "\" & "CurrentLot" & ".xml", CellConTag)  '170126 \783 CellconTag 
 
-                MaterialDefaultColor()
+                'MaterialDefaultColor()
                 UpdateDisplayMaterial()
             End If
 
@@ -2265,7 +2266,9 @@ EndLoop:
                     End Try
 
                     m_frmWarningDialog("กรุณาทำ Final Insp.", False)
-                ElseIf frmfinal.ShowDialog() = Windows.Forms.DialogResult.Retry Then '"ปลดล๊อค"
+                ElseIf frmfinal.DialogResult = DialogResult.Cancel Then
+                    LotCancel()
+                ElseIf frmfinal.DialogResult() = Windows.Forms.DialogResult.Retry Then '"ปลดล๊อค"
 
                     m_frmWarningDialog("Unlock MC เรียบร้อยกรุณา สามารถ Start Lot ได้แล้วครับ", False)
                 Else
@@ -2322,7 +2325,8 @@ EndLoop:
                         End Try
 
                         m_frmWarningDialog("กรุณาทำ Final Insp.", False)
-
+                    ElseIf frmfinal.DialogResult = DialogResult.Cancel Then
+                        LotCancel()
                     End If
                 End If
 
@@ -3459,6 +3463,8 @@ EndLoop:
             End If
 
             Return True
+        ElseIf frmfinal.DialogResult = DialogResult.Cancel Then
+            LotCancel()
         End If
 
         Return False
@@ -3482,6 +3488,8 @@ EndLoop:
 
             LotEnd(My.Settings.ProcessName & "-" & My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.LotEndTime, CellConTag.GoodAdjust, CellConTag.NGAdjust, CellConTag.OPID, EndModeType.Normal)
             Return True
+        ElseIf frmfinal.DialogResult = DialogResult.Cancel Then
+            LotCancel()
         End If
 
         Return False
@@ -5835,5 +5843,22 @@ PreformStateOK:
     End Sub
     Private Sub LotSetupSecsGem()
         SetupLot()
+    End Sub
+    Private Sub LotCancel()
+
+        LotEnd(My.Settings.ProcessName & "-" & My.Settings.EquipmentNo, CellConTag.LotID, CellConTag.LotEndTime, CellConTag.GoodAdjust, CellConTag.NGAdjust, CellConTag.OPID, EndModeType.AbnormalEndAccumulate)
+
+        Dim table As New DBxDataSet.DBDataDataTable
+        Dim ap As DBxDataSetTableAdapters.DBDataTableAdapter = New DBxDataSetTableAdapters.DBDataTableAdapter
+        Dim deleteRow As New DBxDataSetTableAdapters.QueriesTableAdapter1
+        DbDataTableAdapter1.FillBy(table, CellConTag.LotID, CellConTag.LotStartTime)
+        For Each row As DBxDataSet.DBDataRow In table
+            row.Remark = "LotCancel"
+            row.QCFirstLotMode = "-"
+            row.QCFinishLotMode = "-"
+            deleteRow.DeleteInsp(row.LotNo, row.LotStartTime, row.MCNo)
+            ap.Update(row)
+        Next
+
     End Sub
 End Class
